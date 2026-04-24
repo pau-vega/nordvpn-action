@@ -124,68 +124,76 @@ Explicitly excluded. Do not reintroduce without revisiting the rationale.
 
 ## Traceability
 
-Maps each v1 requirement to exactly one phase. Populated during roadmap creation.
+Maps each v1 requirement to exactly one phase. Populated by the roadmapper on 2026-04-24.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCAF-01 | TBD | Pending |
-| SCAF-02 | TBD | Pending |
-| SCAF-03 | TBD | Pending |
-| SCAF-04 | TBD | Pending |
-| SCAF-05 | TBD | Pending |
-| SCAF-06 | TBD | Pending |
-| SCAF-07 | TBD | Pending |
-| LINT-01 | TBD | Pending |
-| LINT-02 | TBD | Pending |
-| LINT-03 | TBD | Pending |
-| LINT-04 | TBD | Pending |
-| LINT-05 | TBD | Pending |
-| NVES-01 | TBD | Pending |
-| NVES-02 | TBD | Pending |
-| NVES-03 | TBD | Pending |
-| NVES-04 | TBD | Pending |
-| NVES-05 | TBD | Pending |
-| NVES-06 | TBD | Pending |
-| NVES-07 | TBD | Pending |
-| NVES-08 | TBD | Pending |
-| NVES-09 | TBD | Pending |
-| NVES-10 | TBD | Pending |
-| NVES-11 | TBD | Pending |
-| NVES-12 | TBD | Pending |
-| NVES-13 | TBD | Pending |
-| NVUS-01 | TBD | Pending |
-| NVUS-02 | TBD | Pending |
-| NVUS-03 | TBD | Pending |
-| NVUS-04 | TBD | Pending |
-| NVUS-05 | TBD | Pending |
-| NVFR-01 | TBD | Pending |
-| NVFR-02 | TBD | Pending |
-| NVFR-03 | TBD | Pending |
-| NVFR-04 | TBD | Pending |
-| NVFR-05 | TBD | Pending |
-| REL-01 | TBD | Pending |
-| REL-02 | TBD | Pending |
-| REL-03 | TBD | Pending |
-| REL-04 | TBD | Pending |
-| REL-05 | TBD | Pending |
-| REL-06 | TBD | Pending |
-| REL-07 | TBD | Pending |
-| REL-08 | TBD | Pending |
-| TEST-01 | TBD | Pending |
-| TEST-02 | TBD | Pending |
-| TEST-03 | TBD | Pending |
-| TEST-04 | TBD | Pending |
-| TEST-05 | TBD | Pending |
-| TEST-06 | TBD | Pending |
-| TEST-07 | TBD | Pending |
-| TEST-08 | TBD | Pending |
-| TEST-09 | TBD | Pending |
+| SCAF-01 | Phase 1 | Pending |
+| SCAF-02 | Phase 1 | Pending |
+| SCAF-03 | Phase 1 | Pending |
+| SCAF-04 | Phase 1 | Pending |
+| SCAF-05 | Phase 1 | Pending |
+| SCAF-06 | Phase 1 | Pending |
+| SCAF-07 | Phase 1 | Pending |
+| LINT-01 | Phase 1 | Pending |
+| LINT-02 | Phase 1 | Pending |
+| LINT-03 | Phase 1 | Pending |
+| LINT-04 | Phase 1 | Pending |
+| LINT-05 | Phase 1 | Pending |
+| NVES-01 | Phase 2 | Pending |
+| NVES-02 | Phase 2 | Pending |
+| NVES-03 | Phase 2 | Pending |
+| NVES-04 | Phase 2 | Pending |
+| NVES-05 | Phase 2 | Pending |
+| NVES-06 | Phase 2 | Pending |
+| NVES-07 | Phase 2 | Pending |
+| NVES-08 | Phase 2 | Pending |
+| NVES-09 | Phase 2 | Pending |
+| NVES-10 | Phase 2 | Pending |
+| NVES-11 | Phase 2 | Pending |
+| NVES-12 | Phase 2 | Pending |
+| NVES-13 | Phase 2 | Pending |
+| NVUS-01 | Phase 3 | Pending |
+| NVUS-02 | Phase 3 | Pending |
+| NVUS-03 | Phase 3 | Pending |
+| NVUS-04 | Phase 3 | Pending |
+| NVUS-05 | Phase 3 | Pending |
+| NVFR-01 | Phase 3 | Pending |
+| NVFR-02 | Phase 3 | Pending |
+| NVFR-03 | Phase 3 | Pending |
+| NVFR-04 | Phase 3 | Pending |
+| NVFR-05 | Phase 3 | Pending |
+| REL-01 | Phase 5 | Pending |
+| REL-02 | Phase 5 | Pending |
+| REL-03 | Phase 5 | Pending |
+| REL-04 | Phase 5 | Pending |
+| REL-05 | Phase 5 | Pending |
+| REL-06 | Phase 5 | Pending |
+| REL-07 | Phase 6 | Pending |
+| REL-08 | Phase 6 | Pending |
+| TEST-01 | Phase 4 | Pending |
+| TEST-02 | Phase 4 | Pending |
+| TEST-03 | Phase 4 | Pending |
+| TEST-04 | Phase 4 | Pending |
+| TEST-05 | Phase 4 | Pending |
+| TEST-06 | Phase 4 | Pending |
+| TEST-07 | Phase 4 | Pending |
+| TEST-08 | Phase 4 | Pending |
+| TEST-09 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 49 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 49 ⚠️ (will be resolved by gsd-roadmapper)
+- v1 requirements: 52 total (correcting an earlier draft that read "49"; authoritative count is this table)
+- Mapped to phases: 52 (100%)
+- Unmapped: 0
+
+**Phase totals:**
+- Phase 1 (Scaffolding & Lint): 12 requirements (SCAF-01..07, LINT-01..05)
+- Phase 2 (Port nordvpn-es): 13 requirements (NVES-01..13)
+- Phase 3 (Mirror nordvpn-us + nordvpn-fr): 10 requirements (NVUS-01..05, NVFR-01..05)
+- Phase 4 (Self-test CI): 9 requirements (TEST-01..09)
+- Phase 5 (release-please wiring): 6 requirements (REL-01..06)
+- Phase 6 (Floating major tag automation): 2 requirements (REL-07..08)
 
 ---
 *Requirements defined: 2026-04-24*
-*Last updated: 2026-04-24 after initial definition*
+*Last updated: 2026-04-24 after roadmap creation (traceability populated)*
