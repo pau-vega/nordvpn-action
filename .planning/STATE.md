@@ -1,3 +1,16 @@
+---
+gsd_state_version: 1.0
+milestone: v0.1.0
+milestone_name: milestone
+status: unknown
+last_updated: "2026-04-26T10:22:34.294Z"
+progress:
+  total_phases: 6
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+---
+
 # State: nordvpn-actions
 
 **Initialized:** 2026-04-24
