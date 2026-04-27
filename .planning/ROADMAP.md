@@ -36,7 +36,11 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
   4. Dependabot opens PRs for GitHub Actions updates across the root and each future per-region directory (`/`, `/actions/nordvpn-{es,us,fr}`, `/actions/nordvpn-{es,us,fr}/disconnect`) via a single `directories:` list; CODEOWNERS auto-assigns `@pau-vega` to any PR touching `actions/**` via a glob, not per-region literals.
   5. A contributor (human or AI agent) reading `AGENTS.md` can find, without guessing, the rules for Conventional-Commit scopes, the fork-safety posture, the composite `post:`-is-unavailable + sibling `disconnect/` contract, the Ubuntu-only runner constraint, and the service-credentials-only auth requirement.
 
-**Plans**: TBD
+**Plans:** 4 plans
+- [ ] 01-01-foundation-docs-PLAN.md — LICENSE + root README + AGENTS.md (SCAF-01, SCAF-02, SCAF-03, SCAF-06)
+- [ ] 01-02-github-config-PLAN.md — .github/CODEOWNERS + .github/dependabot.yml (SCAF-04, SCAF-05)
+- [ ] 01-03-lint-workflow-PLAN.md — .github/workflows/actions-lint.yml (3 parallel jobs, incl. pull_request_target grep guard) (LINT-01..05)
+- [ ] 01-04-branch-protection-PLAN.md — scripts/setup-branch-protection.sh + dir rename + gh repo create + push + run script (SCAF-07)
 
 ### Phase 2: Port nordvpn-es
 
