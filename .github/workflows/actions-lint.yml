@@ -1,0 +1,82 @@
+name: actions-lint
+
+on:
+  pull_request:
+    paths:
+      - 'actions/**'
+      - '.github/workflows/**'
+      - '.github/actions/**'
+  push:
+    branches: [main]
+    paths:
+      - 'actions/**'
+      - '.github/workflows/**'
+      - '.github/actions/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: actions-lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: reviewdog/action-actionlint@6fb7acc99f4a1008869fa8a0f09cfca740837d9d # v1.72.0
+        with:
+          reporter: github-pr-review
+          fail_on_error: true
+          level: error
+
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
+        env:
+          SHELLCHECK_OPTS: "-e SC1090 -e SC1091"
+        with:
+          scandir: ./actions
+          severity: style
+          check_together: 'yes'
+
+  block-pull-request-target:
+    name: block-pull-request-target
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Reject pull_request_target trigger
+        run: |
+          set -euo pipefail
+          shopt -s globstar nullglob
+          offenders=()
+          # Scope: only workflow files under .github/workflows/** (composite action.yml files
+          # cannot define triggers, so scanning them would be theatre — see CONTEXT.md D-11).
+          for f in .github/workflows/**/*.yml .github/workflows/**/*.yaml; do
+            [ -e "$f" ] || continue
+            # Match `pull_request_target` ONLY when it appears as a workflow trigger:
+            #   - on its own indented line as a key (`pull_request_target:`)
+            #   - or as part of an array under `on:` block (`- pull_request_target`)
+            # Comments and incidental string mentions in plain text do not trip the guard
+            # (see CONTEXT.md D-10 for the exact semantics required).
+            if grep -nE '^[[:space:]]*pull_request_target[[:space:]]*:' "$f" \
+               || grep -nE '^[[:space:]]*-[[:space:]]+pull_request_target([[:space:]]|$)' "$f"; then
+              offenders+=("$f")
+            fi
+          done
+          if [ "${#offenders[@]}" -gt 0 ]; then
+            echo "::error::pull_request_target trigger detected in workflow file(s):"
+            for f in "${offenders[@]}"; do
+              echo "::error file=$f::pull_request_target is BANNED in this repo. See AGENTS.md §Security Considerations and .planning/research/PITFALLS.md §2."
+            done
+            echo ""
+            echo "Why: pull_request_target runs the workflow from the base ref with full secrets access; combined with checkout of PR head SHA = arbitrary code execution + secret exfiltration class. Documented attack vectors: timescale/pgai GHSA-89qq-hgvp-x37m; hackerbot-claw April 2026 campaign (475+ malicious PRs in 26h)."
+            echo "Fix: use 'pull_request' instead. If you genuinely need fork-PR feedback, use the split-workflow pattern (pull_request -> artifact handoff -> workflow_run for privileged comment-back)."
+            exit 1
+          fi
+          echo "OK: no pull_request_target trigger found in .github/workflows/**."
