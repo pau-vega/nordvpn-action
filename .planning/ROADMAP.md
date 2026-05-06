@@ -51,13 +51,17 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
 **Requirements**: NVES-01, NVES-02, NVES-03, NVES-04, NVES-05, NVES-06, NVES-07, NVES-08, NVES-09, NVES-10, NVES-11, NVES-12, NVES-13
 
 **Success Criteria** (what must be TRUE):
-  1. A consumer workflow on `ubuntu-latest` that calls `uses: pau-vega/nordvpn-actions/actions/nordvpn-es@<sha>` with `NORDVPN_SERVICE_USERNAME` / `NORDVPN_SERVICE_PASSWORD` from a `Preview` environment connects and a subsequent `curl ipinfo.io/country` returns `ES`; both `ipinfo.io` and `ifconfig.co` must agree or the step fails non-zero with a clear error (no silent success on single-provider).
-  2. The same workflow can read `steps.<id>.outputs.exit-ip`, `country`, `asn`, `tun0-state`, `default-route`, and `connect-duration-ms` — all six outputs are pre-declared in `action.yml` and populated by the verify step (no dynamic post-release output additions, per GitHub #10529).
-  3. A caller that adds the sibling `pau-vega/nordvpn-actions/actions/nordvpn-es/disconnect@<sha>` step with `if: always()` sees openvpn killed, `$RUNNER_TEMP/nordvpn-auth.txt` removed, and no auth file or credential echo left in logs, even when the connect step itself failed mid-run.
-  4. A caller running on `macos-latest` or `windows-latest` sees the action fail fast with a clear "Ubuntu runner required" message (not a cryptic `apt-get: command not found`); a caller whose connection drops DNS through the host resolver instead of the VPN tunnel sees the DNS-egress check fail the verify step (no green badge on DNS leak).
-  5. The `actions/nordvpn-es/README.md` documents Inputs, Outputs, Usage (including the mandatory `if: always()` disconnect step), Versioning (three pin forms with SHA-first recommendation and an explicit warning that floating-major tags are mutable), Credential Rotation under the `Preview` environment, and Troubleshooting with real error strings (AUTH_FAILED → service credentials, country mismatch, fork PR skip); `@main` is never recommended.
+   1. A consumer workflow on `ubuntu-latest` that calls `uses: pau-vega/nordvpn-actions/actions/nordvpn-es@<sha>` with `NORDVPN_SERVICE_USERNAME` / `NORDVPN_SERVICE_PASSWORD` from a `Preview` environment connects and a subsequent `curl ipinfo.io/country` returns `ES`; both `ipinfo.io` and `ifconfig.co` must agree or the step fails non-zero with a clear error (no silent success on single-provider).
+   2. The same workflow can read `steps.<id>.outputs.exit-ip`, `country`, `asn`, `tun0-state`, `default-route`, and `connect-duration-ms` — all six outputs are pre-declared in `action.yml` and populated by the verify step (no dynamic post-release output additions, per GitHub #10529).
+   3. A caller that adds the sibling `pau-vega/nordvpn-actions/actions/nordvpn-es/disconnect@<sha>` step with `if: always()` sees openvpn killed, `$RUNNER_TEMP/nordvpn-auth.txt` removed, and no auth file or credential echo left in logs, even when the connect step itself failed mid-run.
+   4. A caller running on `macos-latest` or `windows-latest` sees the action fail fast with a clear "Ubuntu runner required" message (not a cryptic `apt-get: command not found`); a caller whose connection drops DNS through the host resolver instead of the VPN tunnel sees the DNS-egress check fail the verify step (no green badge on DNS leak).
+   5. The `actions/nordvpn-es/README.md` documents Inputs, Outputs, Usage (including the mandatory `if: always()` disconnect step), Versioning (three pin forms with SHA-first recommendation and an explicit warning that floating-major tags are mutable), Credential Rotation under the `Preview` environment, and Troubleshooting with real error strings (AUTH_FAILED → service credentials, country mismatch, fork PR skip); `@main` is never recommended.
 
-**Plans**: TBD
+**Plans:** 3 plans
+
+- [ ] 02-01-PLAN.md — Port core action files (action.yml, install.sh, connect.sh, verify-country.sh, nordvpn-es.ovpn) with six outputs, retry loop, two-provider geo check, DNS-egress check, $GITHUB_STEP_SUMMARY table (NVES-01..09, NVES-11)
+- [ ] 02-02-PLAN.md — Port disconnect sub-action (disconnect/action.yml, disconnect.sh) with best-effort cleanup, auth file removal, never fails job (NVES-10, NVES-11)
+- [ ] 02-03-PLAN.md — Port and rewrite README.md for pau-vega/nordvpn-actions with Inputs/Outputs/Usage (if: always() disconnect)/Versioning (SHA first, no @main)/Credential Rotation/Troubleshooting (NVES-12, NVES-13)
 
 ### Phase 3: Mirror nordvpn-us + nordvpn-fr
 
