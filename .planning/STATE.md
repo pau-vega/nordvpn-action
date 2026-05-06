@@ -21,19 +21,19 @@ progress:
 
 **Core Value:** A caller can add one `uses:` line and be certain the next steps run from the declared country, or the job fails fast — no hand-written OpenVPN plumbing, no unverified exit IPs.
 
-**Current Focus:** Phase 01 — scaffolding-lint
+**Current Focus:** Phase 02 — port nordvpn-es
 
 ## Current Position
 
-Phase: 01 (scaffolding-lint) — EXECUTING
-Plan: 1 of 4
+Phase: 02 (port-nordvpn-es) — CONTEXT GATHERED
+Plan: 0 of TBD
 | Field | Value |
 |-------|-------|
 | Milestone | v1 |
-| Phase | 1 — Scaffolding & Lint |
-| Plan | (none yet — run `/gsd-plan-phase 1`) |
-| Status | Not started |
-| Progress | `[          ] 0/6 phases` |
+| Phase | 2 — Port nordvpn-es |
+| Plan | (none yet — run `/gsd-plan-phase 2`) |
+| Status | Context gathered |
+| Progress | `[=         ] 1/6 phases` |
 
 ## Performance Metrics
 
@@ -80,9 +80,17 @@ Plan: 1 of 4
 - Wrote `.planning/REQUIREMENTS.md` (52 v1 requirements across 7 categories: SCAF, LINT, NVES, NVUS, NVFR, REL, TEST; v2 deferrals for DIST, REG, AUTO; explicit out-of-scope with rationale).
 - Wrote this roadmap: 6 phases, 100% requirement coverage, goal-backward success criteria (2–5 observable behaviors per phase).
 
+### Decisions Made (Phase 2 context session)
+
+- **Porting approach:** Straight copy from Tutellus PR #159, rewrite README for pau-vega/nordvpn-actions, update all repo references
+- **Script organization:** Keep 4 separate scripts, keep chaos injection vars, keep source PR patterns (shebang, set -e, sudo, relative paths)
+- **Diagnostics table:** Markdown table format for $GITHUB_STEP_SUMMARY with all 6 outputs
+- **Error messages:** Keep all source PR error messages as-is (Ubuntu guard, tun0 timeout, country mismatch, DNS-egress, NordVPN API failure, missing tools)
+- **Retry loop:** Keep in action.yml (not scripts), 2 attempts, 5s sleep between retries, cleanup via disconnect.sh
+
 ### Next Session Start
 
-Run `/gsd-plan-phase 1` to decompose Phase 1 (Scaffolding & Lint) into plans. Expect 3–4 plans given the standard granularity setting.
+Run `/gsd-plan-phase 2` to decompose Phase 2 (Port nordvpn-es) into plans. Expect 3–4 plans given the standard granularity setting.
 
 ---
-*Last updated: 2026-04-24 after initial roadmap creation*
+*Last updated: 2026-05-06 after Phase 2 context gathering*
