@@ -14,7 +14,7 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
 
 - [ ] **Phase 1: Scaffolding & Lint** — Public repo skeleton with MIT license, CODEOWNERS, Dependabot, AGENTS.md, and an enforced `actions-lint` gate on `main`.
 - [ ] **Phase 2: Port nordvpn-es** — Re-home the working Tutellus `nordvpn-es` composite + sibling `disconnect/` on this repo with input/output contract frozen for v1.
-- [ ] **Phase 3: Mirror nordvpn-us + nordvpn-fr** — Duplicate the ES tree for US and FR with region-specific `.ovpn` + hardcoded ISO-2 country guard; no `_shared/` refactor.
+- [x] **Phase 3: Mirror nordvpn-us + nordvpn-fr** — Duplicate the ES tree for US and FR with region-specific `.ovpn` + hardcoded ISO-2 country guard; no `_shared/` refactor.
 - [ ] **Phase 4: Self-test CI** — Matrix E2E workflow across all three regions with fork-safety guard, Preview-environment secret scoping, weekly drift sentinel, and branch protection upgraded to require self-test.
 - [ ] **Phase 5: release-please wiring** — Per-region monorepo release automation producing `nordvpn-<region>-vX.Y.Z` tags driven by Conventional Commits.
 - [ ] **Phase 6: Floating major tag automation** — Post-release job that force-moves `nordvpn-<region>-v<MAJOR>` to the new SHA for each released region.
@@ -77,7 +77,9 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
   3. A CI drift-check step diffs `scripts/*.sh` across the three region directories (ignoring the hardcoded country code) and fails a PR that introduces script divergence without also updating the other regions — catching the copy-paste rot that the deliberate no-`_shared/` stance accepts at N=3.
   4. Each region's `README.md` mirrors `nordvpn-es/README.md` structure with correct regional substitutions (action path, country code, example `uses:` line); no per-region README recommends `@main`, and each documents the mutable floating-major tag explicitly.
 
-**Plans**: TBD
+**Plans**: 2 plans
+- [x] 03-01-PLAN.md — Mirror ES tree → nordvpn-us (country=US, id=230, us.nordvpn.com) (NVUS-01..05)
+- [x] 03-02-PLAN.md — Mirror ES tree → nordvpn-fr (country=FR, id=76, fr.nordvpn.com) (NVFR-01..05)
 
 ### Phase 4: Self-test CI
 
@@ -132,7 +134,7 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
 |-------|----------------|--------|-----------|
 | 1. Scaffolding & Lint | 0/? | Not started | - |
 | 2. Port nordvpn-es | 0/? | Not started | - |
-| 3. Mirror nordvpn-us + nordvpn-fr | 0/? | Not started | - |
+| 3. Mirror nordvpn-us + nordvpn-fr | 2/2 | Complete | 2026-05-07 |
 | 4. Self-test CI | 0/? | Not started | - |
 | 5. release-please wiring | 0/? | Not started | - |
 | 6. Floating major tag automation | 0/? | Not started | - |
