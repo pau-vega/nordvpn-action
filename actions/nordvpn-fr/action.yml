@@ -1,0 +1,62 @@
+# GitHub Docs metadata syntax: https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax
+name: "NordVPN French Egress"
+description: "Connect the runner to a NordVPN French exit node, verify country=FR, expose diagnostics. Teardown is the caller's `if: always()` sibling step — composite actions do not support `post:`."
+inputs:
+  username:
+    description: "NordVPN service username (from Preview env secret NORDVPN_SERVICE_USERNAME)."
+    required: true
+  password:
+    description: "NordVPN service password (from Preview env secret NORDVPN_SERVICE_PASSWORD)."
+    required: true
+outputs:
+  exit-ip:
+    description: "Public IPv4 after tunnel up."
+    value: ${{ steps.verify.outputs.exit-ip }}
+  country:
+    description: "ISO-2 country code of exit IP (must equal FR)."
+    value: ${{ steps.verify.outputs.country }}
+  asn:
+    description: "ASN/ISP of the exit gateway."
+    value: ${{ steps.verify.outputs.asn }}
+  tun0-state:
+    description: "Human-readable tun0 state (`up` / `down-or-missing`)."
+    value: ${{ steps.verify.outputs.tun0-state }}
+  default-route:
+    description: "Active IPv4 default route after connect."
+    value: ${{ steps.verify.outputs.default-route }}
+  connect-duration-ms:
+    description: "Wall-clock time from openvpn invocation to tun0 IPv4 assigned, in ms."
+    value: ${{ steps.verify.outputs.connect-duration-ms }}
+runs:
+  using: "composite"
+  steps:
+    - name: Install OpenVPN + DNS hook
+      shell: bash
+      run: bash "${{ github.action_path }}/scripts/install.sh"
+
+    - name: Connect NordVPN (France) - bounded retry (up to 2 attempts)
+      shell: bash
+      env:
+        NORDVPN_USERNAME: ${{ inputs.username }}
+        NORDVPN_PASSWORD: ${{ inputs.password }}
+      run: |
+        set -euo pipefail
+        attempts=2
+        for i in $(seq 1 "$attempts"); do
+          echo "[action] connect attempt $i/$attempts"
+          if bash "${{ github.action_path }}/scripts/connect.sh"; then
+            exit 0
+          fi
+          if [[ "$i" -lt "$attempts" ]]; then
+            echo "[action] connect failed; cleaning up before retry"
+            bash "${{ github.action_path }}/scripts/disconnect.sh" || true
+            sleep 5
+          fi
+        done
+        echo "::error::connect failed after ${attempts} attempts"
+        exit 1
+
+    - name: Verify French egress (two independent geo providers)
+      id: verify
+      shell: bash
+      run: bash "${{ github.action_path }}/scripts/verify-country.sh" FR

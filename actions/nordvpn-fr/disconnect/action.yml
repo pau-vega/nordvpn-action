@@ -1,0 +1,12 @@
+# Teardown sub-action for the NordVPN French egress composite action.
+# Composite actions do not support `post:` (GitHub Community Discussion #26743),
+# so consumers invoke this sub-action as a sibling step with `if: always()`.
+# Best-effort: disconnect.sh must not fail the job even when the tunnel is already down.
+name: "NordVPN French Egress — Disconnect"
+description: "Tear down the NordVPN tunnel and remove the runtime auth file. Intended as an `if: always()` sibling step to the `nordvpn-fr` action. Best-effort: never fails the job."
+runs:
+  using: "composite"
+  steps:
+    - name: Disconnect NordVPN + cleanup auth file
+      shell: bash
+      run: bash "${{ github.action_path }}/../scripts/disconnect.sh"
