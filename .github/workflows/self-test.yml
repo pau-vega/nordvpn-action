@@ -1,0 +1,178 @@
+name: self-test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'actions/**'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - 'actions/**'
+      - '.github/workflows/**'
+  schedule:
+    - cron: '0 8 * * 1'     # Monday 08:00 UTC — start of work week catch
+  workflow_dispatch:
+    inputs:
+      region:
+        description: 'Region to test'
+        type: choice
+        options:
+          - all       # default — test all 3 regions
+          - es
+          - us
+          - fr
+        default: 'all'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: self-test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fork-check:
+    runs-on: ubuntu-latest
+    outputs:
+      is_fork: ${{ steps.check.outputs.is_fork }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] \
+             && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "is_fork=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping self-test — fork PRs cannot access Preview environment secrets. Maintainer will run on a trusted branch."
+          else
+            echo "is_fork=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  self-test:
+    needs: fork-check
+    if: needs.fork-check.outputs.is_fork == 'false'
+    runs-on: ubuntu-latest
+    environment: Preview
+    strategy:
+      matrix:
+        region: [es, us, fr]
+      fail-fast: false
+    name: self-test (${{ matrix.region }})
+    concurrency:
+      group: self-test-${{ github.workflow }}-${{ matrix.region }}-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Connect NordVPN
+        id: connect
+        uses: ./actions/nordvpn-${{ matrix.region }}
+        with:
+          nordvpn-username: ${{ secrets.NORDVPN_SERVICE_USERNAME }}
+          nordvpn-password: ${{ secrets.NORDVPN_SERVICE_PASSWORD }}
+
+      - name: Post-connect verify
+        env:
+          REGION: ${{ matrix.region }}
+          EXP_COUNTRY: ${{ matrix.region == 'es' && 'ES' || matrix.region == 'us' && 'US' || 'FR' }}
+          EXIT_IP: ${{ steps.connect.outputs.exit-ip }}
+          COUNTRY: ${{ steps.connect.outputs.country }}
+          ASN: ${{ steps.connect.outputs.asn }}
+          TUN0_STATE: ${{ steps.connect.outputs.tun0-state }}
+          DEFAULT_ROUTE: ${{ steps.connect.outputs.default-route }}
+          CONNECT_DURATION: ${{ steps.connect.outputs.connect-duration-ms }}
+        run: |
+          set -euo pipefail
+
+          echo "=== Post-connect verification for nordvpn-${REGION} ==="
+
+          # Assert all 6 outputs are non-empty
+          for var in EXIT_IP COUNTRY ASN TUN0_STATE DEFAULT_ROUTE CONNECT_DURATION; do
+            val="${!var}"
+            if [ -z "$val" ]; then
+              echo "::error::Output '${var,,}' is empty — action did not populate output"
+              exit 1
+            fi
+            echo "  ${var,,}: ${val}"
+          done
+
+          # Assert country output matches expected
+          if [ "$COUNTRY" != "$EXP_COUNTRY" ]; then
+            echo "::error::Country mismatch: action returned '${COUNTRY}', expected '${EXP_COUNTRY}'"
+            exit 1
+          fi
+          echo "  ✓ country matches expected: ${COUNTRY}"
+
+          # Workflow-level geo check via ipinfo.io
+          GEO_COUNTRY="$(curl -fsS https://ipinfo.io/country)"
+          if [ "$GEO_COUNTRY" != "$EXP_COUNTRY" ]; then
+            echo "::error::Geo check failed: ipinfo.io returned '${GEO_COUNTRY}', expected '${EXP_COUNTRY}'"
+            exit 1
+          fi
+          echo "  ✓ ipinfo.io geo check: ${GEO_COUNTRY}"
+
+          echo "=== All verifications passed ==="
+
+      - name: Disconnect VPN
+        uses: ./actions/nordvpn-${{ matrix.region }}/disconnect
+        if: always()
+
+  drift-issue:
+    needs: self-test
+    if: ${{ failure() && github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create or update drift issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # Get list of failed job names from this run
+          FAILED_JOBS="$(
+            gh run view "${{ github.run_id }}" --json jobs \
+              --jq '[.jobs[] | select(.conclusion == "failure") | .name] | join(", ")'
+          )"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          TITLE="region-drift: ${FAILED_JOBS}"
+          BODY="Run: ${RUN_URL}\nFailed regions/jobs: ${FAILED_JOBS}"
+
+          # Upsert pattern: find existing open drift issue
+          EXISTING="$(
+            gh issue list --label region-drift --state open --json number --jq '.[0].number' 2>/dev/null || true
+          )"
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "Updated ${TITLE}\n${BODY}"
+            echo "Updated existing drift issue #${EXISTING}"
+          else
+            gh issue create \
+              --title "$TITLE" \
+              --label region-drift \
+              --body "Run: ${RUN_URL}\nFailed regions/jobs: ${FAILED_JOBS}"
+            echo "Created new drift issue"
+          fi
+
+  drift-close:
+    needs: self-test
+    if: ${{ success() && github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Close drift issue if open
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          EXISTING="$(
+            gh issue list --label region-drift --state open --json number --jq '.[0].number' 2>/dev/null || true
+          )"
+          if [ -n "$EXISTING" ]; then
+            gh issue close "$EXISTING" \
+              --comment "All regions passed on $(date -u +%Y-%m-%d). Closing."
+            echo "Closed drift issue #${EXISTING}"
+          else
+            echo "No open drift issue — all regions healthy."
+          fi

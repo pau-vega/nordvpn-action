@@ -1,0 +1,10 @@
+# actionlint configuration
+# https://github.com/rhysd/actionlint/blob/main/docs/config.md
+#
+# Suppresses false positive: actionlint does not recognize ${{ matrix.* }}
+# in `uses:` lines or job-level concurrency blocks, but GitHub Actions
+# correctly expands matrix templates at compile time for local actions.
+paths:
+  .github/workflows/**/*.{yml,yaml}:
+    ignore:
+      - 'context "matrix" is not allowed here'
