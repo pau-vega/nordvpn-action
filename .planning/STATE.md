@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
-status: Executing Phase 03
-last_updated: "2026-05-07T00:00:00.000Z"
+status: Phase 04 Context Gathered
+last_updated: "2026-05-08T00:00:00.000Z"
 progress:
   total_phases: 6
   completed_phases: 0
@@ -21,19 +21,18 @@ progress:
 
 **Core Value:** A caller can add one `uses:` line and be certain the next steps run from the declared country, or the job fails fast — no hand-written OpenVPN plumbing, no unverified exit IPs.
 
-**Current Focus:** Phase 03 — Mirror nordvpn-us + nordvpn-fr
+**Current Focus:** Phase 04 — Self-test CI
 
 ## Current Position
 
-Phase: 03 (mirror-us-fr) — WAVE 1 COMPLETE
-Plan: 03-01, 03-02 both complete
+Phase: 04 (self-test-ci) — Context gathered
 | Field | Value |
 |-------|-------|
 | Milestone | v1 |
-| Phase | 3 — Mirror nordvpn-us + nordvpn-fr |
-| Plan | 03-01 (US), 03-02 (FR) both complete |
-| Status | Wave 1 complete, phase ready for verification |
-| Progress | `[=         ] 3/6 phases` |
+| Phase | 4 — Self-test CI |
+| Plan | TBD — context gathered 2026-05-08 |
+| Status | Ready for planning |
+| Progress | `[==        ] 3/6 phases context` |
 
 ## Performance Metrics
 
@@ -91,7 +90,14 @@ Plan: 03-01, 03-02 both complete
 
 ### Next Session Start
 
-Run `/gsd-plan-phase 2` to decompose Phase 2 (Port nordvpn-es) into plans. Expect 3–4 plans given the standard granularity setting.
+Run `/gsd-plan-phase 4` to decompose Phase 4 (Self-test CI) into plans. Expect 1-2 plans: the self-test workflow is one file.
+
+### Decisions Made (Phase 4 context session)
+
+- **Branch protection check naming:** Use standard GitHub matrix naming — `self-test (nordvpn-es)`, `self-test (nordvpn-us)`, `self-test (nordvpn-fr)`. Inline into `setup-branch-protection.sh`.
+- **Triggers:** push (main) + pull_request + schedule (Mon 08:00 UTC) + workflow_dispatch. All path-filtered `actions/**, .github/workflows/**`. Workflow_dispatch has region selector input.
+- **Drift issues:** One issue per schedule run, upsert pattern (update existing or create new), auto-close on recovery, `gh` CLI tooling.
+- **Post-connect verification:** Workflow-level curl geo-check (ipinfo.io only) + assert all 6 action outputs non-empty.
 
 ---
-*Last updated: 2026-05-06 after Phase 2 context gathering*
+*Last updated: 2026-05-08 after Phase 4 context gathering*
