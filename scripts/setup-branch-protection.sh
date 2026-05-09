@@ -2,8 +2,8 @@
 # scripts/setup-branch-protection.sh
 #
 # Idempotently enables branch protection on `main` for pau-vega/nordvpn-actions.
-# Required checks: actionlint, shellcheck, block-pull-request-target
-# (the three job names from .github/workflows/actions-lint.yml).
+# Required checks: actionlint, shellcheck, block-pull-request-target (from actions-lint.yml)
+# + self-test (nordvpn-es), self-test (nordvpn-us), self-test (nordvpn-fr) (from self-test.yml).
 #
 # Usage:
 #   gh auth login                      # one-time, if not already authenticated
@@ -27,13 +27,14 @@ BRANCH="main"
 
 # The three required check names MUST match the `name:` field of each job in
 # .github/workflows/actions-lint.yml. If those names change, update this list.
-# Phase 4 amendment hint (NOT for execution now — informational only): when
-# Phase 4 ships TEST-09, add three more entries here for the self-test matrix
-# job names. The JSON array structure is designed for trivial amendment.
+# Phase 4 (TEST-09): self-test matrix jobs added — 6 total checks.
 REQUIRED_CHECKS_JSON='[
-  {"context": "actionlint",                  "app_id": -1},
-  {"context": "shellcheck",                  "app_id": -1},
-  {"context": "block-pull-request-target",   "app_id": -1}
+  {"context": "actionlint",                   "app_id": -1},
+  {"context": "shellcheck",                   "app_id": -1},
+  {"context": "block-pull-request-target",    "app_id": -1},
+  {"context": "self-test (nordvpn-es)",       "app_id": -1},
+  {"context": "self-test (nordvpn-us)",       "app_id": -1},
+  {"context": "self-test (nordvpn-fr)",       "app_id": -1}
 ]'
 
 # Pre-flight: confirm gh CLI is installed and authenticated.
@@ -95,7 +96,7 @@ EOF
 
 echo ""
 echo "Branch protection enabled on ${OWNER}/${REPO}@${BRANCH}."
-echo "Required checks: actionlint, shellcheck, block-pull-request-target"
+echo "Required checks: actionlint, shellcheck, block-pull-request-target, self-test (nordvpn-es), self-test (nordvpn-us), self-test (nordvpn-fr)"
 echo "Admins enforced: yes (no bypass)"
 echo "PR reviews: required (0 approvals — solo repo)"
 echo ""
