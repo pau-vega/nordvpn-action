@@ -90,13 +90,16 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
 **Requirements**: TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, TEST-06, TEST-07, TEST-08, TEST-09
 
 **Success Criteria** (what must be TRUE):
-  1. A push to `main` triggers `self-test.yml` which runs three matrix jobs (`nordvpn-es`, `nordvpn-us`, `nordvpn-fr`) in parallel with `fail-fast: false`; each job uses `uses: ./actions/nordvpn-${{ matrix.region }}` (local path, not tag), reads `NORDVPN_SERVICE_USERNAME` / `NORDVPN_SERVICE_PASSWORD` from `environment: Preview`, and runs the paired disconnect step with `if: always()`.
-  2. A PR opened from a fork sees the matrix jobs skipped by the fork-skip guard with a `::notice::` explaining the Preview-environment fork-safety posture; no Preview-scoped secret is ever exposed to fork-contributor code, and `pull_request_target` is absent from this workflow (and blocked repo-wide by the Phase 1 CI grep).
-  3. Two concurrent runs on the same region + ref do not fight for the same NordVPN session: the `concurrency:` group is keyed by `region + ref` with `cancel-in-progress: false`, so overlapping pushes queue rather than interrupt a live VPN session mid-verify.
-  4. The weekly scheduled cron run surfaces silent drift: if any region fails (for example, because NordVPN decommissioned a server pinned in a `.ovpn`), the workflow opens a GitHub issue labeled `region-drift` so the maintainer is alerted before a consumer files the bug.
-  5. After this phase ships, branch protection on `main` requires both `actions-lint` and the three `self-test` matrix jobs before merge; a PR that breaks VPN egress on any one region cannot be merged even if the other two pass.
+   1. A push to `main` triggers `self-test.yml` which runs three matrix jobs (`nordvpn-es`, `nordvpn-us`, `nordvpn-fr`) in parallel with `fail-fast: false`; each job uses `uses: ./actions/nordvpn-${{ matrix.region }}` (local path, not tag), reads `NORDVPN_SERVICE_USERNAME` / `NORDVPN_SERVICE_PASSWORD` from `environment: Preview`, and runs the paired disconnect step with `if: always()`.
+   2. A PR opened from a fork sees the matrix jobs skipped by the fork-skip guard with a `::notice::` explaining the Preview-environment fork-safety posture; no Preview-scoped secret is ever exposed to fork-contributor code, and `pull_request_target` is absent from this workflow (and blocked repo-wide by the Phase 1 CI grep).
+   3. Two concurrent runs on the same region + ref do not fight for the same NordVPN session: the `concurrency:` group is keyed by `region + ref` with `cancel-in-progress: false`, so overlapping pushes queue rather than interrupt a live VPN session mid-verify.
+   4. The weekly scheduled cron run surfaces silent drift: if any region fails (for example, because NordVPN decommissioned a server pinned in a `.ovpn`), the workflow opens a GitHub issue labeled `region-drift` so the maintainer is alerted before a consumer files the bug.
+   5. After this phase ships, branch protection on `main` requires both `actions-lint` and the three `self-test` matrix jobs before merge; a PR that breaks VPN egress on any one region cannot be merged even if the other two pass.
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 04-01-PLAN.md — Self-test workflow + branch protection amendment (TEST-01..09)
 
 ### Phase 5: release-please wiring
 
@@ -135,7 +138,7 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
 | 1. Scaffolding & Lint | 0/? | Not started | - |
 | 2. Port nordvpn-es | 0/? | Not started | - |
 | 3. Mirror nordvpn-us + nordvpn-fr | 2/2 | Complete | 2026-05-07 |
-| 4. Self-test CI | 0/? | Not started | - |
+| 4. Self-test CI | 0/1 | Planning | - |
 | 5. release-please wiring | 0/? | Not started | - |
 | 6. Floating major tag automation | 0/? | Not started | - |
 
