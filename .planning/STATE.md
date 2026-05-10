@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
-status: Phase 05 Complete
+status: Phase 06 Complete
 last_updated: "2026-05-10T00:00:00.000Z"
 progress:
   total_phases: 6
-  completed_phases: 2
-  total_plans: 9
-  completed_plans: 7
-  percent: 33
+  completed_phases: 3
+  total_plans: 10
+  completed_plans: 8
+  percent: 50
 ---
 
 # State: nordvpn-actions
@@ -21,29 +21,29 @@ progress:
 
 **Core Value:** A caller can add one `uses:` line and be certain the next steps run from the declared country, or the job fails fast — no hand-written OpenVPN plumbing, no unverified exit IPs.
 
-**Current Focus:** Phase 06 — floating major tag automation (planned) → Ready to execute
+**Current Focus:** Phase 06 — floating major tag automation → Complete. All v1 phases done.
 
 ## Current Position
 
-Phase: 06 (floating-major-tags) — Planned
+Phase: 06 (floating-major-tags) — Complete
 | Field | Value |
 |-------|-------|
 | Milestone | v1 |
-| Phase | 6 — Floating major tag automation (Planned) |
-| Plan | 06-01 planned — tag-floating-major job added to release-please.yml |
-| Status | Planned — ready to execute |
-| Progress | `[###       ] 2/6 phases complete, 1/6 planned` |
+| Phase | 6 — Floating major tag automation (Complete) |
+| Plan | 06-01 executed — tag-floating-major job added to release-please.yml |
+| Status | Complete — all 6 phases executed |
+| Progress | `[#####     ] 3/6 phases complete` |
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
 | Phases total (v1) | 6 |
-| Phases complete | 2 |
+| Phases complete | 3 |
 | v1 requirements total | 52 |
-| v1 requirements complete | 6 (REL-01..06) |
-| Plans total | 9 (4 Phase1 + 3 Phase2 + 2 Phase3 + 1 Phase4 + 1 Phase5) |
-| Plans complete | 7 (3 Phase2 + 2 Phase3 + 1 Phase4 + 1 Phase5) |
+| v1 requirements complete | 8 (REL-01..08) |
+| Plans total | 10 (4 Phase1 + 3 Phase2 + 2 Phase3 + 1 Phase4 + 1 Phase5 + 1 Phase6) |
+| Plans complete | 8 (3 Phase2 + 2 Phase3 + 1 Phase4 + 1 Phase5 + 1 Phase6) |
 
 ## Accumulated Context
 
@@ -123,7 +123,7 @@ Phase: 06 (floating-major-tags) — Planned
 
 ### Next Session Start
 
-Phase 06 (floating major tag automation) ready for planning. Run `/gsd-plan-phase 6`.
+Phase 06 (floating major tag automation) complete. All 6 v1 phases executed. Next: milestone v1 completion review.
 
 ---
 

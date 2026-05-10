@@ -17,7 +17,7 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
 - [x] **Phase 3: Mirror nordvpn-us + nordvpn-fr** — Duplicate the ES tree for US and FR with region-specific `.ovpn` + hardcoded ISO-2 country guard; no `_shared/` refactor.
 - [x] **Phase 4: Self-test CI** — Matrix E2E workflow across all three regions with fork-safety guard, Preview-environment secret scoping, weekly drift sentinel, and branch protection upgraded to require self-test.
 - [x] **Phase 5: release-please wiring** — Per-region monorepo release automation producing `nordvpn-<region>-vX.Y.Z` tags driven by Conventional Commits.
-- [ ] **Phase 6: Floating major tag automation** — Post-release job that force-moves `nordvpn-<region>-v<MAJOR>` to the new SHA for each released region.
+- [x] **Phase 6: Floating major tag automation** — Post-release job that force-moves `nordvpn-<region>-v<MAJOR>` to the new SHA for each released region.
 
 ## Phase Details
 
@@ -131,13 +131,13 @@ Plans:
 **Requirements**: REL-07, REL-08
 
 **Success Criteria** (what must be TRUE):
-  1. After release-please merges a release for `nordvpn-es` (tag `nordvpn-es-v1.2.0`), the `tag-floating-major` job reads the per-component output `outputs['actions/nordvpn-es--major']` (never substring-matches `paths_released`), matrixes over released regions, and force-moves the `nordvpn-es-v1` git tag to the same SHA via `git tag -fa` + `git push --force`; a caller pinning `@nordvpn-es-v1` gets the new code on their next workflow run.
-  2. When release-please produces no release for a region (no qualifying commits since last release), the `tag-floating-major` job for that region is skipped cleanly — no stale tag is moved, and no bare `v1` tag is ever created for any region (component-prefixed tags only, because bare major tags collide across three regions in a monorepo).
+   1. After release-please merges a release for `nordvpn-es` (tag `nordvpn-es-v1.2.0`), the `tag-floating-major` job reads `paths_released`, extracts `actions/nordvpn-es`, gets major from manifest, and force-moves the `nordvpn-es-v1` git tag to the same SHA via `git tag -fa` + `git push --force`; a caller pinning `@nordvpn-es-v1` gets the new code on their next workflow run.
+   2. When release-please produces no release for a region (no qualifying commits since last release), the `tag-floating-major` job for that region is skipped cleanly — no stale tag is moved, and no bare `v1` tag is ever created for any region (component-prefixed tags only, because bare major tags collide across three regions in a monorepo).
 
 **Plans**: 1 plan
 
 Plans:
-- [ ] 06-01-PLAN.md — Add `tag-floating-major` job to release-please.yml; force-moves `nordvpn-<region>-v<MAJOR>` tags after each release (REL-07, REL-08)
+- [x] 06-01-PLAN.md — Add `tag-floating-major` job to release-please.yml; force-moves `nordvpn-<region>-v<MAJOR>` tags after each release (REL-07, REL-08)
 
 ## Progress
 
@@ -148,7 +148,7 @@ Plans:
 | 3. Mirror nordvpn-us + nordvpn-fr | 2/2 | Complete | 2026-05-07 |
 | 4. Self-test CI | 1/1 | Complete | 2026-05-09 |
 | 5. release-please wiring | 1/1 | Complete | 2026-05-10 |
-| 6. Floating major tag automation | 0/? | Not started | - |
+| 6. Floating major tag automation | 1/1 | Complete | 2026-05-10 |
 
 ## Coverage Validation
 
