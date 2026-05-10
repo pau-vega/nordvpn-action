@@ -47,33 +47,28 @@ jobs:
             echo "is_fork=false" >> "$GITHUB_OUTPUT"
           fi
 
-  self-test:
+  self-test-es:
     needs: fork-check
-    if: needs.fork-check.outputs.is_fork == 'false'
+    if: |
+      needs.fork-check.outputs.is_fork == 'false' &&
+      (github.event_name != 'workflow_dispatch' || github.event.inputs.region == 'all' || github.event.inputs.region == 'es')
     runs-on: ubuntu-latest
     environment: Preview
-    strategy:
-      matrix:
-        region: [es, us, fr]
-      fail-fast: false
-    name: self-test (${{ matrix.region }})
     concurrency:
-      group: self-test-${{ github.workflow }}-${{ matrix.region }}-${{ github.ref }}
+      group: self-test-es-${{ github.ref }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Connect NordVPN
         id: connect
-        uses: ./actions/nordvpn-${{ matrix.region }}
+        uses: ./actions/nordvpn-es
         with:
-          nordvpn-username: ${{ secrets.NORDVPN_SERVICE_USERNAME }}
-          nordvpn-password: ${{ secrets.NORDVPN_SERVICE_PASSWORD }}
+          username: ${{ secrets.NORDVPN_SERVICE_USERNAME }}
+          password: ${{ secrets.NORDVPN_SERVICE_PASSWORD }}
 
       - name: Post-connect verify
         env:
-          REGION: ${{ matrix.region }}
-          EXP_COUNTRY: ${{ matrix.region == 'es' && 'ES' || matrix.region == 'us' && 'US' || 'FR' }}
           EXIT_IP: ${{ steps.connect.outputs.exit-ip }}
           COUNTRY: ${{ steps.connect.outputs.country }}
           ASN: ${{ steps.connect.outputs.asn }}
@@ -83,7 +78,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "=== Post-connect verification for nordvpn-${REGION} ==="
+          echo "=== Post-connect verification for nordvpn-es ==="
 
           # Assert all 6 outputs are non-empty
           for var in EXIT_IP COUNTRY ASN TUN0_STATE DEFAULT_ROUTE CONNECT_DURATION; do
@@ -96,16 +91,16 @@ jobs:
           done
 
           # Assert country output matches expected
-          if [ "$COUNTRY" != "$EXP_COUNTRY" ]; then
-            echo "::error::Country mismatch: action returned '${COUNTRY}', expected '${EXP_COUNTRY}'"
+          if [ "$COUNTRY" != "ES" ]; then
+            echo "::error::Country mismatch: action returned '${COUNTRY}', expected 'ES'"
             exit 1
           fi
           echo "  ✓ country matches expected: ${COUNTRY}"
 
           # Workflow-level geo check via ipinfo.io
           GEO_COUNTRY="$(curl -fsS https://ipinfo.io/country)"
-          if [ "$GEO_COUNTRY" != "$EXP_COUNTRY" ]; then
-            echo "::error::Geo check failed: ipinfo.io returned '${GEO_COUNTRY}', expected '${EXP_COUNTRY}'"
+          if [ "$GEO_COUNTRY" != "ES" ]; then
+            echo "::error::Geo check failed: ipinfo.io returned '${GEO_COUNTRY}', expected 'ES'"
             exit 1
           fi
           echo "  ✓ ipinfo.io geo check: ${GEO_COUNTRY}"
@@ -113,11 +108,133 @@ jobs:
           echo "=== All verifications passed ==="
 
       - name: Disconnect VPN
-        uses: ./actions/nordvpn-${{ matrix.region }}/disconnect
+        uses: ./actions/nordvpn-es/disconnect
+        if: always()
+
+  self-test-us:
+    needs: fork-check
+    if: |
+      needs.fork-check.outputs.is_fork == 'false' &&
+      (github.event_name != 'workflow_dispatch' || github.event.inputs.region == 'all' || github.event.inputs.region == 'us')
+    runs-on: ubuntu-latest
+    environment: Preview
+    concurrency:
+      group: self-test-us-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Connect NordVPN
+        id: connect
+        uses: ./actions/nordvpn-us
+        with:
+          username: ${{ secrets.NORDVPN_SERVICE_USERNAME }}
+          password: ${{ secrets.NORDVPN_SERVICE_PASSWORD }}
+
+      - name: Post-connect verify
+        env:
+          EXIT_IP: ${{ steps.connect.outputs.exit-ip }}
+          COUNTRY: ${{ steps.connect.outputs.country }}
+          ASN: ${{ steps.connect.outputs.asn }}
+          TUN0_STATE: ${{ steps.connect.outputs.tun0-state }}
+          DEFAULT_ROUTE: ${{ steps.connect.outputs.default-route }}
+          CONNECT_DURATION: ${{ steps.connect.outputs.connect-duration-ms }}
+        run: |
+          set -euo pipefail
+
+          echo "=== Post-connect verification for nordvpn-us ==="
+
+          for var in EXIT_IP COUNTRY ASN TUN0_STATE DEFAULT_ROUTE CONNECT_DURATION; do
+            val="${!var}"
+            if [ -z "$val" ]; then
+              echo "::error::Output '${var,,}' is empty — action did not populate output"
+              exit 1
+            fi
+            echo "  ${var,,}: ${val}"
+          done
+
+          if [ "$COUNTRY" != "US" ]; then
+            echo "::error::Country mismatch: action returned '${COUNTRY}', expected 'US'"
+            exit 1
+          fi
+          echo "  ✓ country matches expected: ${COUNTRY}"
+
+          GEO_COUNTRY="$(curl -fsS https://ipinfo.io/country)"
+          if [ "$GEO_COUNTRY" != "US" ]; then
+            echo "::error::Geo check failed: ipinfo.io returned '${GEO_COUNTRY}', expected 'US'"
+            exit 1
+          fi
+          echo "  ✓ ipinfo.io geo check: ${GEO_COUNTRY}"
+
+          echo "=== All verifications passed ==="
+
+      - name: Disconnect VPN
+        uses: ./actions/nordvpn-us/disconnect
+        if: always()
+
+  self-test-fr:
+    needs: fork-check
+    if: |
+      needs.fork-check.outputs.is_fork == 'false' &&
+      (github.event_name != 'workflow_dispatch' || github.event.inputs.region == 'all' || github.event.inputs.region == 'fr')
+    runs-on: ubuntu-latest
+    environment: Preview
+    concurrency:
+      group: self-test-fr-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Connect NordVPN
+        id: connect
+        uses: ./actions/nordvpn-fr
+        with:
+          username: ${{ secrets.NORDVPN_SERVICE_USERNAME }}
+          password: ${{ secrets.NORDVPN_SERVICE_PASSWORD }}
+
+      - name: Post-connect verify
+        env:
+          EXIT_IP: ${{ steps.connect.outputs.exit-ip }}
+          COUNTRY: ${{ steps.connect.outputs.country }}
+          ASN: ${{ steps.connect.outputs.asn }}
+          TUN0_STATE: ${{ steps.connect.outputs.tun0-state }}
+          DEFAULT_ROUTE: ${{ steps.connect.outputs.default-route }}
+          CONNECT_DURATION: ${{ steps.connect.outputs.connect-duration-ms }}
+        run: |
+          set -euo pipefail
+
+          echo "=== Post-connect verification for nordvpn-fr ==="
+
+          for var in EXIT_IP COUNTRY ASN TUN0_STATE DEFAULT_ROUTE CONNECT_DURATION; do
+            val="${!var}"
+            if [ -z "$val" ]; then
+              echo "::error::Output '${var,,}' is empty — action did not populate output"
+              exit 1
+            fi
+            echo "  ${var,,}: ${val}"
+          done
+
+          if [ "$COUNTRY" != "FR" ]; then
+            echo "::error::Country mismatch: action returned '${COUNTRY}', expected 'FR'"
+            exit 1
+          fi
+          echo "  ✓ country matches expected: ${COUNTRY}"
+
+          GEO_COUNTRY="$(curl -fsS https://ipinfo.io/country)"
+          if [ "$GEO_COUNTRY" != "FR" ]; then
+            echo "::error::Geo check failed: ipinfo.io returned '${GEO_COUNTRY}', expected 'FR'"
+            exit 1
+          fi
+          echo "  ✓ ipinfo.io geo check: ${GEO_COUNTRY}"
+
+          echo "=== All verifications passed ==="
+
+      - name: Disconnect VPN
+        uses: ./actions/nordvpn-fr/disconnect
         if: always()
 
   drift-issue:
-    needs: self-test
+    needs: [self-test-es, self-test-us, self-test-fr]
     if: ${{ failure() && github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     permissions:
@@ -155,7 +272,7 @@ jobs:
           fi
 
   drift-close:
-    needs: self-test
+    needs: [self-test-es, self-test-us, self-test-fr]
     if: ${{ success() && github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     permissions:
