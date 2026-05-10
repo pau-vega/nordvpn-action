@@ -1,18 +1,14 @@
 ---
-status: testing
+status: complete
 phase: 01-scaffolding-lint
 source: [01-01-foundation-docs-SUMMARY.md, 01-02-github-config-SUMMARY.md, 01-03-lint-workflow-SUMMARY.md, 01-04-branch-protection-SUMMARY.md]
 started: 2026-05-07T08:18:56Z
-updated: 2026-05-07T08:31:00Z
+updated: 2026-05-10T10:51:00Z
 ---
 
 ## Current Test
 
-number: 13
-name: Branch Protection Script Exists
-expected: |
-  scripts/setup-branch-protection.sh exists at repo root, is executable (-rwxr-xr-x), has set -euo pipefail, no set -x
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -66,34 +62,34 @@ result: pass
 
 ### 13. Branch Protection Script Exists
 expected: scripts/setup-branch-protection.sh exists at repo root, is executable (-rwxr-xr-x), has set -euo pipefail, no set -x
-result: [pending]
+result: pass
 
 ### 14. Script Constants Correct
 expected: setup-branch-protection.sh has OWNER="pau-vega", REPO="nordvpn-actions", 3 required checks (actionlint, shellcheck, block-pull-request-target)
-result: [pending]
+result: pass
 
 ### 15. Script Pre-flight Checks
 expected: setup-branch-protection.sh checks for gh CLI presence, gh auth status, and repo existence before attempting API call
-result: [pending]
+result: pass
 
 ### 16. Script Uses PUT (Idempotent)
 expected: setup-branch-protection.sh uses `gh api --method PUT` (full replace, idempotent), enforce_admins: true, required_approving_review_count: 0, restrictions: null
-result: [pending]
+result: pass
 
 ### 17. Shellcheck Clean on Scripts
 expected: Running `shellcheck scripts/setup-branch-protection.sh` locally exits 0 with no errors
-result: [pending]
+result: pass
 
 ### 18. Cold Start Smoke Test
 expected: Kill any running server/service. Clear ephemeral state (temp DBs, caches, lock files). Start the application from scratch. Server boots without errors, any seed/migration completes, and a primary query (health check, homepage load, or basic API call) returns live data.
-result: [pending]
+result: pass
 
 ## Summary
 
 total: 18
-passed: 12
+passed: 18
 issues: 0
-pending: 6
+pending: 0
 skipped: 0
 blocked: 0
 
