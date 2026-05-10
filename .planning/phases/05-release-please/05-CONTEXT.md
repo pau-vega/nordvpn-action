@@ -116,5 +116,48 @@ None — discussion stayed within Phase 5 scope (release-please wiring).
 
 ---
 
+<post_planning>
+## Post-Implementation Procedures
+
+### Bootstrap Verification Checklist
+
+After the Phase 5 PR merges to `main`:
+
+1. **Verify release-please runs:** Push any commit to `main` — check Actions tab for `release-please` workflow run. Should complete without error (no release PR expected yet — first qualifying commit triggers first release PR).
+
+2. **Test first release:** Push a `feat(nordvpn-es): bootstrap first release` commit. release-please should open ONE release PR for `nordvpn-es` only (not US or FR). Merge it.
+
+3. **Verify tag:** `git tag -l 'nordvpn-*'` should show `nordvpn-es-v0.1.0` (first release with `release-as: "0.1.0"`).
+
+4. **Verify manifest update:** `jq '.["actions/nordvpn-es"]' .release-please-manifest.json` should show `"0.1.0"` (not `"0.0.0"`).
+
+5. **Remove release-as bootstrap (per D-05):** After first ES release merges, submit a follow-up PR:
+   - Commit: `chore(release): remove release-as bootstrap for nordvpn-es`
+   - Change: Delete the `"release-as": "0.1.0"` line from `.github/release-please-config.json` (and the trailing comma on the previous line — `"changelog-path": "CHANGELOG.md"` → no comma after it, and add comma after `}`)
+   - After merge, ES uses standard release-please bumping from commit history
+
+6. **Verify per-region isolation:** Push a `fix(nordvpn-fr): test isolation` commit. release-please should open a release PR ONLY for `nordvpn-fr`. ES and US versions should not change.
+
+### D-09 Verification: Shared Root CHANGELOG.md
+
+**Risk acknowledged:** Three packages writing to the same root `CHANGELOG.md` with `separate-pull-requests: true`. Each release PR appends entries under `## nordvpn-{region}` sections — these are non-overlapping, so git merges should succeed without conflicts.
+
+**If conflicts occur during bootstrap:**
+- Merge the first release PR, then rebase the second onto the updated main
+- release-please will regenerate the second PR's changelog on rebase
+- This is a one-time bootstrap friction; once all three regions have released at least once, the sections are established and future release PRs only append to known sections
+
+**Alternative (rejected per D-07/D-08):** Per-region changelogs (`actions/nordvpn-es/CHANGELOG.md`) would avoid any merge conflict risk but would scatter changelog entries across three files. User chose root CHANGELOG.md for consumer visibility.
+
+### CI Considerations
+
+- `release-please.yml` is NOT added as a required check on branch protection (Phase 1/4). It runs on push to main, not on PR — it validates the release process, not PR code quality.
+- The release-please workflow does not interact with `actions-lint.yml` or `self-test.yml` — all three coexist independently.
+- After Phase 6 adds the `update-major-tags` job, the `needs: release-please` dependency ensures floating tags only move after a successful release.
+
+</post_planning>
+
+---
+
 *Phase: 05-release-please*
 *Context gathered: 2026-05-10*
