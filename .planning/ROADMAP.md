@@ -134,7 +134,10 @@ Plans:
   1. After release-please merges a release for `nordvpn-es` (tag `nordvpn-es-v1.2.0`), the `tag-floating-major` job reads the per-component output `outputs['actions/nordvpn-es--major']` (never substring-matches `paths_released`), matrixes over released regions, and force-moves the `nordvpn-es-v1` git tag to the same SHA via `git tag -fa` + `git push --force`; a caller pinning `@nordvpn-es-v1` gets the new code on their next workflow run.
   2. When release-please produces no release for a region (no qualifying commits since last release), the `tag-floating-major` job for that region is skipped cleanly — no stale tag is moved, and no bare `v1` tag is ever created for any region (component-prefixed tags only, because bare major tags collide across three regions in a monorepo).
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 06-01-PLAN.md — Add `tag-floating-major` job to release-please.yml; force-moves `nordvpn-<region>-v<MAJOR>` tags after each release (REL-07, REL-08)
 
 ## Progress
 

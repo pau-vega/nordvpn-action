@@ -21,18 +21,18 @@ progress:
 
 **Core Value:** A caller can add one `uses:` line and be certain the next steps run from the declared country, or the job fails fast — no hand-written OpenVPN plumbing, no unverified exit IPs.
 
-**Current Focus:** Phase 05 — release-please wiring (complete) → Phase 06 next
+**Current Focus:** Phase 06 — floating major tag automation (planned) → Ready to execute
 
 ## Current Position
 
-Phase: 05 (release-please) — Complete
+Phase: 06 (floating-major-tags) — Planned
 | Field | Value |
 |-------|-------|
 | Milestone | v1 |
-| Phase | 5 — release-please wiring (Complete) |
-| Plan | 05-01 complete — release-please config/workflow/CHANGELOG shipped |
-| Status | Complete |
-| Progress | `[###       ] 2/6 phases complete` |
+| Phase | 6 — Floating major tag automation (Planned) |
+| Plan | 06-01 planned — tag-floating-major job added to release-please.yml |
+| Status | Planned — ready to execute |
+| Progress | `[###       ] 2/6 phases complete, 1/6 planned` |
 
 ## Performance Metrics
 
