@@ -29,3 +29,28 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  tag-floating-major:
+    needs: [release-please]
+    if: needs.release-please.outputs.releases_created == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: ${{ fromJSON(needs.release-please.outputs.paths_released) }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Force-move floating major tag
+        shell: bash
+        run: |
+          COMPONENT="${{ matrix.component }}"
+          REGION="$(basename "$COMPONENT")"
+          NEW_VERSION="$(jq -r ".[\"$COMPONENT\"]" .release-please-manifest.json)"
+          MAJOR="${NEW_VERSION%%.*}"
+          FLOATING_TAG="${REGION}-v${MAJOR}"
+
+          git tag -fa "$FLOATING_TAG" -m "Floating major tag for ${REGION} v${NEW_VERSION}"
+          git push origin --force "$FLOATING_TAG"
+          echo "::notice::Moved ${FLOATING_TAG} -> ${REGION} v${NEW_VERSION}"
