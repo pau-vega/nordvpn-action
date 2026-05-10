@@ -1,9 +1,4 @@
----
-gsd_state_version: 1.0
-milestone: v0.1.0
-milestone_name: milestone
-status: Phase 04 Complete
-last_updated: "2026-05-09T00:00:00.000Z"
+---\ngsd_state_version: 1.0\nmilestone: v0.1.0\nmilestone_name: milestone\nstatus: Phase 05 Context Gathered\nlast_updated: "2026-05-10T00:00:00.000Z"
 progress:
   total_phases: 6
   completed_phases: 1
@@ -21,17 +16,17 @@ progress:
 
 **Core Value:** A caller can add one `uses:` line and be certain the next steps run from the declared country, or the job fails fast — no hand-written OpenVPN plumbing, no unverified exit IPs.
 
-**Current Focus:** Phase 04 — Self-test CI (complete)
+**Current Focus:** Phase 05 — release-please wiring (context gathered)
 
 ## Current Position
 
-Phase: 04 (self-test-ci) — Complete
+Phase: 05 (release-please) — Context Gathered
 | Field | Value |
 |-------|-------|
 | Milestone | v1 |
-| Phase | 4 — Self-test CI (Complete) |
-| Plan | 04-01 — Self-test workflow + branch protection amendment |
-| Status | Complete |
+| Phase | 5 — release-please wiring (Context Gathered) |
+| Plan | None yet — run /gsd-plan-phase 5 |
+| Status | Context gathered, ready for planning |
 | Progress | `[##        ] 1/6 phases complete` |
 
 ## Performance Metrics
@@ -90,7 +85,16 @@ Phase: 04 (self-test-ci) — Complete
 
 ### Next Session Start
 
-Run `/gsd-plan-phase 4` to decompose Phase 4 (Self-test CI) into plans. Expect 1-2 plans: the self-test workflow is one file.
+Run `/gsd-plan-phase 5` to decompose Phase 5 (release-please wiring) into plans. Expect 1 plan: 3 files (`.release-please-manifest.json`, `.release-please-config.json`, `.github/workflows/release-please.yml`).
+
+### Decisions Made (Phase 5 context session)
+
+- **Changelog sections:** Angular order (feat→fix→perf→refactor→docs→deps visible; revert→chore→test→ci→style hidden). deps visible for Dependabot PR visibility.
+- **Bootstrap strategy:** Use `release-as` field to force initial versions. nordvpn-es starts at 0.1.0; US/FR stay at 0.0.0 seed. Remove `release-as` after first release.
+- **Changelog path:** Root-level `CHANGELOG.md` — planner must verify compatibility with `separate-pull-requests: true`.
+- **Workflow structure:** Single job (release-please). Phase 6 adds second job independently. No placeholder needed.
+- **Commit scope:** Phase 5 PR uses `ci(release):` scope — non-region, won't trigger unintended release PRs.
+- **Workflow trigger:** No `paths:` filter — run on every push to main, rely on Conventional Commit scopes for routing.
 
 ### Decisions Made (Phase 4 execution session)
 
