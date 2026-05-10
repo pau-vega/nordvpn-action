@@ -59,12 +59,12 @@ Requirements for initial release. Each maps to exactly one roadmap phase.
 
 ### Release & Versioning (REL)
 
-- [ ] **REL-01**: `.github/release-please-manifest.json` tracks per-region versions (`actions/nordvpn-es`, `actions/nordvpn-us`, `actions/nordvpn-fr`) seeded at `0.0.0`
-- [ ] **REL-02**: `.github/release-please-config.json` defines three packages with `release-type: "simple"`, `include-component-in-tag: true`, `separate-pull-requests: true`, `bump-minor-pre-major: true`, `bump-patch-for-minor-pre-major: true`
-- [ ] **REL-03**: Each package has a `changelog-sections` array with `feat`, `fix`, `docs`, `refactor`, `perf` visible; `chore`, `test`, `ci`, `style` hidden
-- [ ] **REL-04**: `.github/workflows/release-please.yml` runs on push to `main`, uses the canonical `googleapis/release-please-action@<pinned-sha>` (v5.0.0), and has `permissions: contents: write, pull-requests: write`
-- [ ] **REL-05**: Workflow uses `actions/checkout@<pinned-sha>` with `fetch-depth: 0` so release-please sees the full commit history
-- [ ] **REL-06**: Release tags are produced in the form `nordvpn-<region>-vX.Y.Z` (no bare `vX.Y.Z`, no `<region>@X.Y.Z`)
+- [x] **REL-01**: `.github/release-please-manifest.json` tracks per-region versions (`actions/nordvpn-es`, `actions/nordvpn-us`, `actions/nordvpn-fr`) seeded at `0.0.0`
+- [x] **REL-02**: `.github/release-please-config.json` defines three packages with `release-type: "simple"`, `include-component-in-tag: true`, `separate-pull-requests: true`, `bump-minor-pre-major: true`, `bump-patch-for-minor-pre-major: true`
+- [x] **REL-03**: Each package has a `changelog-sections` array with `feat`, `fix`, `docs`, `refactor`, `perf` visible; `chore`, `test`, `ci`, `style` hidden
+- [x] **REL-04**: `.github/workflows/release-please.yml` runs on push to `main`, uses the canonical `googleapis/release-please-action@<pinned-sha>` (v5.0.0), and has `permissions: contents: write, pull-requests: write`
+- [x] **REL-05**: Workflow uses `actions/checkout@<pinned-sha>` with `fetch-depth: 0` so release-please sees the full commit history
+- [x] **REL-06**: Release tags are produced in the form `nordvpn-<region>-vX.Y.Z` (no bare `vX.Y.Z`, no `<region>@X.Y.Z`)
 - [ ] **REL-07**: A `tag-floating-major` job runs after release-please in the same workflow; reads per-component outputs (`outputs['actions/nordvpn-<region>--release_created']`, `--tag_name`, `--major`) — never substring-matches `paths_released`
 - [ ] **REL-08**: `tag-floating-major` job matrixes over regions, force-moves per-component tags `nordvpn-<region>-v<MAJOR>` via `git tag -fa` + `git push --force`; no bare `v<MAJOR>` tags are created
 
@@ -163,12 +163,17 @@ Maps each v1 requirement to exactly one phase. Populated by the roadmapper on 20
 | NVFR-03 | Phase 3 | Pending |
 | NVFR-04 | Phase 3 | Pending |
 | NVFR-05 | Phase 3 | Pending |
-| REL-01 | Phase 5 | Pending |
-| REL-02 | Phase 5 | Pending |
-| REL-03 | Phase 5 | Pending |
-| REL-04 | Phase 5 | Pending |
-| REL-05 | Phase 5 | Pending |
-| REL-06 | Phase 5 | Pending |
+| REL-01 | Phase 5 | Complete |
+
+| REL-02 | Phase 5 | Complete |
+
+| REL-03 | Phase 5 | Complete |
+
+| REL-04 | Phase 5 | Complete |
+
+| REL-05 | Phase 5 | Complete |
+
+| REL-06 | Phase 5 | Complete |
 | REL-07 | Phase 6 | Pending |
 | REL-08 | Phase 6 | Pending |
 | TEST-01 | Phase 4 | Pending |

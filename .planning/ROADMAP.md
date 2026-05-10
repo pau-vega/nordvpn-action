@@ -16,7 +16,7 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
 - [ ] **Phase 2: Port nordvpn-es** — Re-home the working Tutellus `nordvpn-es` composite + sibling `disconnect/` on this repo with input/output contract frozen for v1.
 - [x] **Phase 3: Mirror nordvpn-us + nordvpn-fr** — Duplicate the ES tree for US and FR with region-specific `.ovpn` + hardcoded ISO-2 country guard; no `_shared/` refactor.
 - [x] **Phase 4: Self-test CI** — Matrix E2E workflow across all three regions with fork-safety guard, Preview-environment secret scoping, weekly drift sentinel, and branch protection upgraded to require self-test.
-- [ ] **Phase 5: release-please wiring** — Per-region monorepo release automation producing `nordvpn-<region>-vX.Y.Z` tags driven by Conventional Commits.
+- [x] **Phase 5: release-please wiring** — Per-region monorepo release automation producing `nordvpn-<region>-vX.Y.Z` tags driven by Conventional Commits.
 - [ ] **Phase 6: Floating major tag automation** — Post-release job that force-moves `nordvpn-<region>-v<MAJOR>` to the new SHA for each released region.
 
 ## Phase Details
@@ -120,7 +120,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 05-01-PLAN.md — Release-please config, manifest, workflow, and root CHANGELOG.md seed (REL-01..06)
+- [x] 05-01-PLAN.md — Release-please config, manifest, workflow, and root CHANGELOG.md seed (REL-01..06)
 
 ### Phase 6: Floating major tag automation
 
@@ -144,7 +144,7 @@ Plans:
 | 2. Port nordvpn-es | 0/? | Not started | - |
 | 3. Mirror nordvpn-us + nordvpn-fr | 2/2 | Complete | 2026-05-07 |
 | 4. Self-test CI | 1/1 | Complete | 2026-05-09 |
-| 5. release-please wiring | 0/1 | Not started | - |
+| 5. release-please wiring | 1/1 | Complete | 2026-05-10 |
 | 6. Floating major tag automation | 0/? | Not started | - |
 
 ## Coverage Validation
