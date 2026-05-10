@@ -12,7 +12,7 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Self-test CI workflow: runs the action end-to-end on push to `main` and on non-fork PRs using `Preview` environment secrets; forks skip cleanly — Validated in Phase 4
 
 ### Active
 
@@ -22,7 +22,7 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
 - [ ] Add `nordvpn-fr` composite action (bundled `.ovpn`, same input/output contract as `-es`, country verified = `FR`)
 - [ ] Sibling `disconnect/` sub-action per region for `if: always()` teardown (composite actions cannot use `post:`)
 - [ ] `actions-lint` CI workflow: `actionlint` + `shellcheck` strict on every PR touching `actions/**` or `.github/workflows/**`
-- [ ] Self-test CI workflow: runs the action end-to-end on push to `main` and on non-fork PRs using `Preview` environment secrets; forks skip cleanly
+
 - [ ] Release tooling: release-please monorepo config with per-action `release-type: simple`, `component: nordvpn-<region>`, conventional-commit-driven `CHANGELOG.md` per action
 - [ ] Floating major tag automation: after every release of `nordvpn-<region>-vX.Y.Z`, a CI job force-moves `nordvpn-<region>-v<MAJOR>` (and/or `v<MAJOR>` where unambiguous) to the same SHA
 - [ ] CODEOWNERS scoped to `/actions/ @pau-vega`
@@ -98,4 +98,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 after initialization*
+*Last updated: 2026-05-09 after Phase 4 completion*

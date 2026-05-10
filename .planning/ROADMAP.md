@@ -15,7 +15,7 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
 - [ ] **Phase 1: Scaffolding & Lint** — Public repo skeleton with MIT license, CODEOWNERS, Dependabot, AGENTS.md, and an enforced `actions-lint` gate on `main`.
 - [ ] **Phase 2: Port nordvpn-es** — Re-home the working Tutellus `nordvpn-es` composite + sibling `disconnect/` on this repo with input/output contract frozen for v1.
 - [x] **Phase 3: Mirror nordvpn-us + nordvpn-fr** — Duplicate the ES tree for US and FR with region-specific `.ovpn` + hardcoded ISO-2 country guard; no `_shared/` refactor.
-- [ ] **Phase 4: Self-test CI** — Matrix E2E workflow across all three regions with fork-safety guard, Preview-environment secret scoping, weekly drift sentinel, and branch protection upgraded to require self-test.
+- [x] **Phase 4: Self-test CI** — Matrix E2E workflow across all three regions with fork-safety guard, Preview-environment secret scoping, weekly drift sentinel, and branch protection upgraded to require self-test.
 - [ ] **Phase 5: release-please wiring** — Per-region monorepo release automation producing `nordvpn-<region>-vX.Y.Z` tags driven by Conventional Commits.
 - [ ] **Phase 6: Floating major tag automation** — Post-release job that force-moves `nordvpn-<region>-v<MAJOR>` to the new SHA for each released region.
 
@@ -85,6 +85,8 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
 
 **Goal**: Every push to `main` and every non-fork PR runs all three regional actions end-to-end in a matrix using local `./actions/...` references, forks skip cleanly with a clear notice, a weekly scheduled run acts as a drift sentinel that opens a `region-drift` issue on failure, and `main` is now protected behind both `actions-lint` and the three `self-test` matrix jobs.
 
+**Completed**: 2026-05-09
+
 **Depends on**: Phase 3 (matrix needs all three regions present; running self-test with a partial matrix would defer half the requirements)
 
 **Requirements**: TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, TEST-06, TEST-07, TEST-08, TEST-09
@@ -99,7 +101,7 @@ A caller can add one `uses:` line and be certain the next steps run from the dec
 **Plans**: 1 plan
 
 Plans:
-- [ ] 04-01-PLAN.md — Self-test workflow + branch protection amendment (TEST-01..09)
+- [x] 04-01-PLAN.md — Self-test workflow + branch protection amendment (TEST-01..09)
 
 ### Phase 5: release-please wiring
 
@@ -138,7 +140,7 @@ Plans:
 | 1. Scaffolding & Lint | 0/? | Not started | - |
 | 2. Port nordvpn-es | 0/? | Not started | - |
 | 3. Mirror nordvpn-us + nordvpn-fr | 2/2 | Complete | 2026-05-07 |
-| 4. Self-test CI | 0/1 | Planning | - |
+| 4. Self-test CI | 1/1 | Complete | 2026-05-09 |
 | 5. release-please wiring | 0/? | Not started | - |
 | 6. Floating major tag automation | 0/? | Not started | - |
 
