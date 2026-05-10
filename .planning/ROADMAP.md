@@ -117,7 +117,10 @@ Plans:
   3. The resulting `actions/nordvpn-fr/CHANGELOG.md` entry lists `feat`, `fix`, `docs`, `refactor`, `perf` commits visibly and hides `chore`, `test`, `ci`, `style` — matching the `changelog-sections` contract so consumers see only meaningful changes.
   4. The `release-please.yml` workflow uses the canonical `googleapis/release-please-action@<pinned-sha>` (v5.0.0, not the archived `google-github-actions/` predecessor), runs on push to `main` with `permissions: contents: write, pull-requests: write`, and checks out with `fetch-depth: 0` so the full commit history is visible.
 
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 05-01-PLAN.md — Release-please config, manifest, workflow, and root CHANGELOG.md seed (REL-01..06)
 
 ### Phase 6: Floating major tag automation
 
@@ -141,7 +144,7 @@ Plans:
 | 2. Port nordvpn-es | 0/? | Not started | - |
 | 3. Mirror nordvpn-us + nordvpn-fr | 2/2 | Complete | 2026-05-07 |
 | 4. Self-test CI | 1/1 | Complete | 2026-05-09 |
-| 5. release-please wiring | 0/? | Not started | - |
+| 5. release-please wiring | 0/1 | Not started | - |
 | 6. Floating major tag automation | 0/? | Not started | - |
 
 ## Coverage Validation
