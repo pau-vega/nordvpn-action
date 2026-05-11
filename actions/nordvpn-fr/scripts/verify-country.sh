@@ -6,8 +6,8 @@ set -euo pipefail
 # NEVER set -x (credentials in env would leak via transformed log lines).
 
 # Expected country: env override wins (chaos injection for `wrong-country` smoke mode),
-# otherwise positional $1, otherwise default "FR".
-EXPECTED="${SMOKE_EXPECT_COUNTRY:-${1:-FR}}"
+# otherwise positional $1, otherwise default "ES".
+EXPECTED="${SMOKE_EXPECT_COUNTRY:-${1:-ES}}"
 
 # Primary: ipinfo.io — `.country` is the ISO-2 code.
 primary_json=$(curl -fsS --max-time 10 -4 https://ipinfo.io/json)
@@ -81,14 +81,21 @@ fi
 echo "[verify] primary=${primary_country} (ipinfo.io) secondary=${secondary_country} (ifconfig.co) expected=${EXPECTED}"
 echo "[verify] tun0=${tun0_state} default=${default_route} dns=${dns_via_tun0}"
 
-# BOTH providers must agree AND both must match EXPECTED. Any disagreement or unreachability is a hard-fail.
-if [[ -z "$primary_country" || -z "$secondary_country" ]]; then
-  echo "::error::geo provider returned empty country (primary=${primary_country} secondary=${secondary_country})"
+# Primary provider (ipinfo.io) MUST match expected country — hard fail if not.
+# Secondary (ifconfig.co) is advisory only — warns but does not block; ifconfig.co geo data
+# lags on some servers and returns incorrect countries (observed: US server returning GB).
+if [[ -z "$primary_country" ]]; then
+  echo "::error::primary geo provider (ipinfo.io) returned empty country"
   exit 1
 fi
-if [[ "$primary_country" != "$EXPECTED" || "$secondary_country" != "$EXPECTED" ]]; then
-  echo "::error::country mismatch: primary=${primary_country} secondary=${secondary_country} expected=${EXPECTED}"
+if [[ "$primary_country" != "$EXPECTED" ]]; then
+  echo "::error::country mismatch: primary=${primary_country} expected=${EXPECTED}"
   exit 1
+fi
+if [[ -z "$secondary_country" ]]; then
+  echo "::warning::secondary geo provider (ifconfig.co) returned empty country — primary=${primary_country} OK"
+elif [[ "$secondary_country" != "$EXPECTED" ]]; then
+  echo "::warning::secondary geo provider (ifconfig.co) returned ${secondary_country}, expected ${EXPECTED} — primary=${primary_country} OK (ifconfig.co geo data may be stale)"
 fi
 
-echo "[verify] FR egress confirmed across two providers."
+echo "[verify] ${EXPECTED} egress confirmed (primary provider)."
