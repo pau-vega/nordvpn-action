@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/pau-vega/nordvpn-action/security/advisories/new
+    about: Report security vulnerabilities privately. Do NOT open a public issue for credential-handling, secret-leak, or supply-chain bugs.
+  - name: Code of Conduct concern
+    url: https://github.com/pau-vega/nordvpn-action/security/advisories/new
+    about: Conduct reports route through the same private channel as security reports. Prefix the title with [CoC]. See .github/CODE_OF_CONDUCT.md.
+  - name: Contributor and architectural guide
+    url: https://github.com/pau-vega/nordvpn-action/blob/main/.github/CONTRIBUTING.md
+    about: Read CONTRIBUTING.md (humans) or AGENTS.md (agents) before filing — many "is this a bug" questions are answered there.

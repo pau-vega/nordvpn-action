@@ -1,0 +1,106 @@
+name: Bug report
+description: Report a failure or incorrect behavior in one of the nordvpn-* actions.
+title: "[bug] <region>: <summary>"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. The fields below mirror what we need first to triage — providing them up front avoids a back-and-forth.
+
+        **Do not open a bug report for a security/credential-handling issue.** Use the private channel documented in [`.github/SECURITY.md`](../SECURITY.md) instead.
+
+  - type: dropdown
+    id: region
+    attributes:
+      label: Affected region
+      description: Which composite action is failing?
+      options:
+        - nordvpn-es (Spain)
+        - nordvpn-us (United States)
+        - nordvpn-fr (France)
+        - More than one region
+        - Not region-specific (CI, docs, release tooling, etc.)
+    validations:
+      required: true
+
+  - type: input
+    id: pinned-ref
+    attributes:
+      label: Pinned ref
+      description: "The SHA or tag your workflow pins (the value after `@` in `uses: pau-vega/nordvpn-action/actions/nordvpn-<region>@<ref>`)."
+      placeholder: "e.g. de0fac2e4500dabe0009e67214ff5f5447ce83dd  or  nordvpn-es-v1.0.0  or  nordvpn-es-v1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: runner
+    attributes:
+      label: Runner OS
+      description: The `runs-on:` value used by the caller workflow.
+      options:
+        - ubuntu-latest
+        - ubuntu-24.04
+        - ubuntu-22.04
+        - Other (specify in "Additional context")
+    validations:
+      required: true
+
+  - type: textarea
+    id: outputs
+    attributes:
+      label: Action outputs
+      description: |
+        Paste the six outputs from the connect step, exactly as the action returned them. Blank values are themselves a useful signal — paste them blank rather than omitting the line.
+      placeholder: |
+        exit-ip: 203.0.113.42
+        country: ES
+        asn: AS12479 Telefonica de Espana SAU
+        tun0-state: up
+        default-route: tun0
+        connect-duration-ms: 4218
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect the action to do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead? Include the full step log excerpt (redact secrets first — Service-credential username/password should never appear in logs, but double-check).
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproducer
+    attributes:
+      label: Minimal workflow that reproduces the issue
+      description: A trimmed `jobs:` block — caller workflow, not the action internals.
+      render: yaml
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submit checks
+      options:
+        - label: I confirmed the same behavior on the latest tagged release of the affected region.
+          required: false
+        - label: I checked the [per-region README troubleshooting section](https://github.com/pau-vega/nordvpn-action/tree/main/actions) and did not find a documented cause.
+          required: false
+        - label: This is not a security or credential-handling issue. (If it is — close this and use the private channel in [`SECURITY.md`](../SECURITY.md).)
+          required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else — recent changes to the caller workflow, NordVPN dashboard changes, runner image version, etc.

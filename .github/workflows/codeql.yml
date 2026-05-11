@@ -1,0 +1,59 @@
+name: codeql
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+      - 'actions/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+      - 'actions/**'
+  schedule:
+    # Tuesday 06:00 UTC — separate from the Saturday Scorecard cron and the Monday self-test cron.
+    - cron: '0 6 * * 2'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (actions)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # Required for code-scanning result upload.
+      security-events: write
+      # `github/codeql-action/init` reads workflow run metadata for the actions language.
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # `actions` is the first-class CodeQL language for analyzing GitHub Actions
+        # workflows and `action.yml` files — catches expression-injection /
+        # untrusted-input-in-`run:` patterns that actionlint does not detect.
+        # No source-language analysis is configured because this repo ships only
+        # Bash scripts (not a CodeQL-supported language) and YAML.
+        language: [actions]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@7fd177fa680c9881b53cdab4d346d32574c9f7f4 # v3.35.4
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@7fd177fa680c9881b53cdab4d346d32574c9f7f4 # v3.35.4
+        with:
+          category: "/language:${{ matrix.language }}"

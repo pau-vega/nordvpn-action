@@ -34,6 +34,7 @@ concurrency:
 jobs:
   fork-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     outputs:
       is_fork: ${{ steps.check.outputs.is_fork }}
     steps:
@@ -53,11 +54,22 @@ jobs:
       needs.fork-check.outputs.is_fork == 'false' &&
       (github.event_name != 'workflow_dispatch' || github.event.inputs.region == 'all' || github.event.inputs.region == 'es')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: Preview
     concurrency:
       group: self-test-es-${{ github.ref }}
       cancel-in-progress: false
     steps:
+      - name: Harden the runner (audit egress)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          # `audit` logs unexpected egress without blocking — useful for catching
+          # drift (e.g. a third geo provider appearing in verify-country.sh). Move
+          # to `block` with an explicit allow-list once the audit baseline is
+          # stable. The action handles credentials/sudo/openvpn correctly under
+          # audit; do not enable `block` without testing.
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Connect NordVPN
@@ -117,11 +129,17 @@ jobs:
       needs.fork-check.outputs.is_fork == 'false' &&
       (github.event_name != 'workflow_dispatch' || github.event.inputs.region == 'all' || github.event.inputs.region == 'us')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: Preview
     concurrency:
       group: self-test-us-${{ github.ref }}
       cancel-in-progress: false
     steps:
+      - name: Harden the runner (audit egress)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Connect NordVPN
@@ -178,11 +196,17 @@ jobs:
       needs.fork-check.outputs.is_fork == 'false' &&
       (github.event_name != 'workflow_dispatch' || github.event.inputs.region == 'all' || github.event.inputs.region == 'fr')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: Preview
     concurrency:
       group: self-test-fr-${{ github.ref }}
       cancel-in-progress: false
     steps:
+      - name: Harden the runner (audit egress)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Connect NordVPN
@@ -237,6 +261,7 @@ jobs:
     needs: [self-test-es, self-test-us, self-test-fr]
     if: ${{ failure() && github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       issues: write
     steps:
@@ -254,20 +279,24 @@ jobs:
           )"
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           TITLE="region-drift: ${FAILED_JOBS}"
-          BODY="Run: ${RUN_URL}\nFailed regions/jobs: ${FAILED_JOBS}"
+          # Compose the issue body via a heredoc so the line break renders as an
+          # actual newline in the GitHub issue. The previous "\n" form embedded
+          # a literal two-character backslash-n in the rendered markdown.
+          BODY="$(printf 'Run: %s\nFailed regions/jobs: %s\n' "$RUN_URL" "$FAILED_JOBS")"
 
           # Upsert pattern: find existing open drift issue
           EXISTING="$(
             gh issue list --label region-drift --state open --json number --jq '.[0].number' 2>/dev/null || true
           )"
           if [ -n "$EXISTING" ]; then
-            gh issue comment "$EXISTING" --body "Updated ${TITLE}\n${BODY}"
+            COMMENT="$(printf 'Updated %s\n%s\n' "$TITLE" "$BODY")"
+            gh issue comment "$EXISTING" --body "$COMMENT"
             echo "Updated existing drift issue #${EXISTING}"
           else
             gh issue create \
               --title "$TITLE" \
               --label region-drift \
-              --body "Run: ${RUN_URL}\nFailed regions/jobs: ${FAILED_JOBS}"
+              --body "$BODY"
             echo "Created new drift issue"
           fi
 
@@ -275,6 +304,7 @@ jobs:
     needs: [self-test-es, self-test-us, self-test-fr]
     if: ${{ success() && github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       issues: write
     steps:

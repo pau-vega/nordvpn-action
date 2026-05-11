@@ -1,0 +1,62 @@
+name: Feature request
+description: Propose a new capability, a new region, or a change to an existing action.
+title: "[feat] <area>: <summary>"
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for new surface, new regions, new outputs, or substantive behavior changes. For typos, doc tweaks, and CI hygiene, a PR is fine without an issue — see [`.github/CONTRIBUTING.md`](../CONTRIBUTING.md).
+
+        **Frozen v1 contracts:** input names, output names, and the six-output shape are intentionally locked. Proposals to change them will be evaluated against the v1.1+ scope, not retro-fitted into v1. See [`AGENTS.md`](../../AGENTS.md) §Frozen v1 contracts.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Where does this proposal land?
+      options:
+        - Existing region (behavior, defaults, troubleshooting)
+        - New region (e.g. nordvpn-de, nordvpn-uk)
+        - Root meta-action / Marketplace listing
+        - CI / release tooling / supply-chain hardening
+        - Documentation / onboarding
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What pain are you experiencing today? Concrete is better than abstract.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: Sketch the change. Action surface, workflow YAML shape, or implementation pointers — whichever fits.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What did you rule out, and why? Helps avoid re-litigating known-rejected paths (`pull_request_target`, Node toolchain, macOS runners, etc. — see `AGENTS.md` §Banned constructs).
+
+  - type: input
+    id: links
+    attributes:
+      label: References
+      description: Links to upstream NordVPN docs, GitHub Actions docs, related issues / discussions.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submit checks
+      options:
+        - label: I read [`AGENTS.md`](../../AGENTS.md) §Banned constructs and this proposal does not reintroduce a banned construct.
+          required: true
+        - label: This is not a security / credential-handling concern. (If it is — close this and use [`SECURITY.md`](../SECURITY.md).)
+          required: true

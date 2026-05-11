@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/setup-branch-protection.sh
 #
-# Idempotently enables branch protection on `main` for pau-vega/nordvpn-actions.
+# Idempotently enables branch protection on `main` for pau-vega/nordvpn-action.
 # Required checks: actionlint, shellcheck, block-pull-request-target (from actions-lint.yml)
 # + self-test (nordvpn-es), self-test (nordvpn-us), self-test (nordvpn-fr) (from self-test.yml).
 #
@@ -22,19 +22,25 @@
 set -euo pipefail
 
 OWNER="pau-vega"
-REPO="nordvpn-actions"
+REPO="nordvpn-action"
 BRANCH="main"
 
-# The three required check names MUST match the `name:` field of each job in
-# .github/workflows/actions-lint.yml. If those names change, update this list.
-# Phase 4 (TEST-09): self-test matrix jobs added — 6 total checks.
+# The required check names MUST match the `name:` field of each job in
+# .github/workflows/actions-lint.yml + the per-region jobs in
+# .github/workflows/self-test.yml. If those names change, update this list.
+# Phase 4 (TEST-09): self-test added three per-region jobs — 6 total checks.
+# NOTE: self-test jobs are top-level (`self-test-es` / `self-test-us` / `self-test-fr`),
+# NOT a matrix strategy — so the GitHub check-run names match the job IDs exactly
+# (no parenthesized matrix suffix). The earlier parenthesized form
+# (`self-test (nordvpn-es)`) was never reported by GitHub and blocked every PR
+# from merging — fixed by aligning the contexts with the actual job names.
 REQUIRED_CHECKS_JSON='[
-  {"context": "actionlint",                   "app_id": -1},
-  {"context": "shellcheck",                   "app_id": -1},
-  {"context": "block-pull-request-target",    "app_id": -1},
-  {"context": "self-test (nordvpn-es)",       "app_id": -1},
-  {"context": "self-test (nordvpn-us)",       "app_id": -1},
-  {"context": "self-test (nordvpn-fr)",       "app_id": -1}
+  {"context": "actionlint",                "app_id": -1},
+  {"context": "shellcheck",                "app_id": -1},
+  {"context": "block-pull-request-target", "app_id": -1},
+  {"context": "self-test-es",              "app_id": -1},
+  {"context": "self-test-us",              "app_id": -1},
+  {"context": "self-test-fr",              "app_id": -1}
 ]'
 
 # Pre-flight: confirm gh CLI is installed and authenticated.

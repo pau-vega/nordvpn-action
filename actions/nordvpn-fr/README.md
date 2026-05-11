@@ -38,14 +38,14 @@ jobs:
 
       - name: Connect NordVPN (FR)
         id: vpn
-        uses: pau-vega/nordvpn-actions/actions/nordvpn-fr@<40-char-SHA> # vX.Y.Z
+        uses: pau-vega/nordvpn-action/actions/nordvpn-fr@<40-char-SHA> # vX.Y.Z
         with:
           username: ${{ secrets.NORDVPN_SERVICE_USERNAME }}
           password: ${{ secrets.NORDVPN_SERVICE_PASSWORD }}
 
       - name: Disconnect VPN
         if: always()
-        uses: pau-vega/nordvpn-actions/actions/nordvpn-fr/disconnect@<40-char-SHA> # vX.Y.Z
+        uses: pau-vega/nordvpn-action/actions/nordvpn-fr/disconnect@<40-char-SHA> # vX.Y.Z
 ```
 
 - Use the 40-character commit SHA for deterministic pinning. The `# vX.Y.Z` comment is for human readability (Dependabot updates both atomically).
