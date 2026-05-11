@@ -59,14 +59,15 @@ if [[ "${SMOKE_SKIP_OPENVPN_START:-0}" != "1" ]]; then
     --remote "$NORDVPN_REMOTE_HOST" 443 \
     --daemon \
     --writepid "$PID_FILE" \
-    --log "$RUNNER_TEMP/openvpn.log"
+    --log "$RUNNER_TEMP/openvpn.log" \
+    --verb 5
 fi
 
 # Readiness is `ip -4 addr show tun0` returning `inet ` — NOT `openvpn --daemon`'s exit
 # (the daemon forks and exits 0 before the handshake completes).
 # Poll every 2s, 30s total timeout. Interface existence is not enough; require IPv4 assigned.
 start_ms=$(date +%s%3N)
-timeout_s=30
+timeout_s=60
 deadline=$(( $(date +%s) + timeout_s ))
 while (( $(date +%s) < deadline )); do
   if ip -4 addr show tun0 2>/dev/null | grep -q 'inet '; then
