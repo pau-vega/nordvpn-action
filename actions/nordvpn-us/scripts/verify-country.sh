@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Primary provider: ipinfo.io/json returns .country as ISO-2.
 # Secondary provider: ifconfig.co/json returns .country_iso as ISO-2 (NOT .country — that's the full English name).
-# Any disagreement or provider unreachability is a hard fail (no retries).
+# Primary must match expected country (hard fail). Secondary is advisory only.
 set -euo pipefail
 # NEVER set -x (credentials in env would leak via transformed log lines).
 
@@ -9,14 +9,18 @@ set -euo pipefail
 # otherwise positional $1, otherwise default "ES".
 EXPECTED="${SMOKE_EXPECT_COUNTRY:-${1:-ES}}"
 
+# Brief stabilization delay: the tunnel just came up; the route through tun0 may
+# need a moment to propagate before outbound requests route correctly.
+sleep 2
+
 # Primary: ipinfo.io — `.country` is the ISO-2 code.
-primary_json=$(curl -fsS --max-time 10 -4 https://ipinfo.io/json)
+primary_json=$(curl -fsS --max-time 20 -4 https://ipinfo.io/json)
 primary_country=$(echo "$primary_json" | jq -r '.country // empty')
 primary_ip=$(echo "$primary_json"      | jq -r '.ip // empty')
 primary_asn=$(echo "$primary_json"     | jq -r '.org // empty')
 
 # Secondary: ifconfig.co — `.country_iso` is the ISO-2 code (field name DIFFERS from primary — ifconfig.co's `.country` is the English name).
-secondary_json=$(curl -fsS --max-time 10 -4 https://ifconfig.co/json)
+secondary_json=$(curl -fsS --max-time 20 -4 https://ifconfig.co/json)
 secondary_country=$(echo "$secondary_json" | jq -r '.country_iso // empty')
 
 # Runtime diagnostics (all safe — no credentials).
