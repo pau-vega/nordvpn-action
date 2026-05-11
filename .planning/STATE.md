@@ -125,6 +125,12 @@ Phase: 06 (floating-major-tags) — Complete
 
 Phase 06 (floating major tag automation) complete. All 6 v1 phases executed. Next: milestone v1 completion review.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 20260511-fix-corrupted-ca-certs | Fix corrupted CA certs causing self-test failure | 2026-05-11 | f98b636 | [20260511-fix-corrupted-ca-certs](./quick/20260511-fix-corrupted-ca-certs/) |
+
 ---
 
-*Last updated: 2026-05-10 after Phase 5 execution*
+*Last updated: 2026-05-11 after quick task 20260511-fix-corrupted-ca-certs*
