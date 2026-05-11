@@ -1,6 +1,9 @@
 # GitHub Docs metadata syntax: https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax
 name: "NordVPN French Egress"
 description: "Connect the runner to a NordVPN French exit node, verify country=FR, expose diagnostics. Teardown is the caller's `if: always()` sibling step — composite actions do not support `post:`."
+branding:
+  icon: "lock"
+  color: "blue"
 inputs:
   username:
     description: "NordVPN service username (from Preview env secret NORDVPN_SERVICE_USERNAME)."
