@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/setup-branch-protection.sh
 #
-# Idempotently enables branch protection on `main` for pau-vega/nordvpn-actions.
+# Idempotently enables branch protection on `main` for pau-vega/nordvpn-action.
 # Required checks: actionlint, shellcheck, block-pull-request-target (from actions-lint.yml)
 # + self-test (nordvpn-es), self-test (nordvpn-us), self-test (nordvpn-fr) (from self-test.yml).
 #
@@ -22,7 +22,7 @@
 set -euo pipefail
 
 OWNER="pau-vega"
-REPO="nordvpn-actions"
+REPO="nordvpn-action"
 BRANCH="main"
 
 # The three required check names MUST match the `name:` field of each job in

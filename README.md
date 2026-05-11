@@ -1,4 +1,4 @@
-# nordvpn-actions
+# nordvpn-action
 
 Composite GitHub Actions that route a runner through a NordVPN exit node in a specific country (ES, US, FR) and verify the geo-IP before downstream steps run.
 
@@ -25,7 +25,7 @@ Three ways to pin a `uses:` line, strongest to weakest. Choose based on your rep
 ### 1. Commit SHA (recommended for release-critical workflows)
 
 ```yaml
-- uses: pau-vega/nordvpn-actions/actions/nordvpn-es@<40-char-SHA> # nordvpn-es-v1.0.0
+- uses: pau-vega/nordvpn-action/actions/nordvpn-es@<40-char-SHA> # nordvpn-es-v1.0.0
 ```
 
 **Use when:** production CI, security-critical workflows, OpenSSF Scorecard "pinned-dependencies" compliance.
@@ -35,7 +35,7 @@ Three ways to pin a `uses:` line, strongest to weakest. Choose based on your rep
 ### 2. Exact version tag
 
 ```yaml
-- uses: pau-vega/nordvpn-actions/actions/nordvpn-es@nordvpn-es-v1.0.0
+- uses: pau-vega/nordvpn-action/actions/nordvpn-es@nordvpn-es-v1.0.0
 ```
 
 **Use when:** you want a specific version, more readable than a SHA, and you accept that exact tags are technically mutable (release-please does not move them; git permits force-push by a maintainer with write access — this repo does not).
@@ -45,7 +45,7 @@ Three ways to pin a `uses:` line, strongest to weakest. Choose based on your rep
 ### 3. Floating major tag (convenience — auto-patch updates)
 
 ```yaml
-- uses: pau-vega/nordvpn-actions/actions/nordvpn-es@nordvpn-es-v1
+- uses: pau-vega/nordvpn-action/actions/nordvpn-es@nordvpn-es-v1
 ```
 
 **Use when:** you want auto-bump to the latest patch/minor for major v1 of a region.
@@ -54,7 +54,7 @@ Three ways to pin a `uses:` line, strongest to weakest. Choose based on your rep
 
 ### Never use `@main`
 
-`uses: pau-vega/nordvpn-actions/actions/nordvpn-es@main` is **not** a recommended pin form. `main` moves on every merge — your workflow would resolve to whatever code happens to be on `main` at run time, with no version contract. This README does not document `@main` as a supported form. Pinning options are SHA, exact tag, or floating major; nothing else.
+`uses: pau-vega/nordvpn-action/actions/nordvpn-es@main` is **not** a recommended pin form. `main` moves on every merge — your workflow would resolve to whatever code happens to be on `main` at run time, with no version contract. This README does not document `@main` as a supported form. Pinning options are SHA, exact tag, or floating major; nothing else.
 
 ## Required setup (consumers)
 

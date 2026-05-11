@@ -191,7 +191,7 @@ check_req "SCAF-07" "Script is executable" test -x scripts/setup-branch-protecti
 check_req "SCAF-07" "Script has bash shebang" bash -c 'head -n 1 scripts/setup-branch-protection.sh | grep -qE "^#!/usr/bin/env bash$"'
 check_req "SCAF-07" "Script has set -euo pipefail" grep -qE '^set -euo pipefail$' scripts/setup-branch-protection.sh
 check_req "SCAF-07" "OWNER = pau-vega" grep -qE 'OWNER="pau-vega"' scripts/setup-branch-protection.sh
-check_req "SCAF-07" "REPO = nordvpn-actions" grep -qE 'REPO="nordvpn-actions"' scripts/setup-branch-protection.sh
+check_req "SCAF-07" "REPO = nordvpn-action" grep -qE 'REPO="nordvpn-action"' scripts/setup-branch-protection.sh
 check_req "SCAF-07" "Required check: actionlint" grep -qE '"context": "actionlint"' scripts/setup-branch-protection.sh
 check_req "SCAF-07" "Required check: shellcheck" grep -qE '"context": "shellcheck"' scripts/setup-branch-protection.sh
 check_req "SCAF-07" "Required check: block-pull-request-target" grep -qE '"context": "block-pull-request-target"' scripts/setup-branch-protection.sh
