@@ -40,15 +40,15 @@ chmod 600 "$AUTH_FILE"
 # online server. The --remote CLI flag overrides the config file's remote line.
 NORD_API='https://api.nordvpn.com/v1/servers/recommendations'
 NORD_QUERY='filters%5Bcountry_id%5D=74&filters%5Bservers_technologies%5D%5Bidentifier%5D=openvpn_tcp&limit=1'
-if ! NORDVPN_REMOTE_HOST=$(curl -fsS --max-time 10 "${NORD_API}?${NORD_QUERY}" | jq -r '.[0].hostname'); then
+if ! NORDVPN_REMOTE_IP=$(curl -fsS --max-time 10 "${NORD_API}?${NORD_QUERY}" | jq -r '.[0].station'); then
   echo "::error::failed to query api.nordvpn.com for recommended FR server"
   exit 1
 fi
-if [[ -z "$NORDVPN_REMOTE_HOST" || "$NORDVPN_REMOTE_HOST" == "null" ]]; then
+if [[ -z "$NORDVPN_REMOTE_IP" || "$NORDVPN_REMOTE_IP" == "null" ]]; then
   echo "::error::api.nordvpn.com returned empty hostname for FR openvpn_tcp"
   exit 1
 fi
-echo "[connect.sh] NordVPN server: $NORDVPN_REMOTE_HOST"
+echo "[connect.sh] NordVPN server IP: $NORDVPN_REMOTE_IP"
 
 # Chaos injection (`tun0-timeout` smoke mode): skip the openvpn invocation so the
 # tun0 readiness poll times out. Production callers never set this env var.
@@ -56,7 +56,7 @@ if [[ "${SMOKE_SKIP_OPENVPN_START:-0}" != "1" ]]; then
   sudo openvpn \
     --config "$CONFIG_FILE" \
     --auth-user-pass "$AUTH_FILE" \
-    --remote "$NORDVPN_REMOTE_HOST" 443 \
+    --remote "$NORDVPN_REMOTE_IP" 1194 \
     --daemon \
     --writepid "$PID_FILE" \
     --log "$RUNNER_TEMP/openvpn.log" \
