@@ -1,0 +1,25 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Shell scripts — match existing actions/**/scripts/*.sh style (4-space indent).
+[*.sh]
+indent_size = 4
+
+# YAML — GitHub Actions / Dependabot convention.
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdown — preserve trailing whitespace (hard line breaks are two spaces).
+[*.md]
+trim_trailing_whitespace = false
+
+# Makefile (if/when added) — tabs are required.
+[Makefile]
+indent_style = tab
