@@ -7,32 +7,34 @@
   "include-component-in-tag": true,
   "include-v-in-tag": true,
   "changelog-sections": [
-    { "type": "feat",     "section": "Features" },
-    { "type": "fix",      "section": "Bug Fixes" },
-    { "type": "perf",     "section": "Performance Improvements" },
-    { "type": "refactor", "section": "Code Refactoring" },
-    { "type": "docs",     "section": "Documentation" },
-    { "type": "deps",     "section": "Dependencies" },
-    { "type": "revert",   "section": "Reverts",                   "hidden": true },
-    { "type": "chore",    "section": "Miscellaneous",             "hidden": true },
-    { "type": "test",     "section": "Tests",                     "hidden": true },
-    { "type": "ci",       "section": "Continuous Integration",    "hidden": true },
-    { "type": "style",    "section": "Code Style",                "hidden": true },
-    { "type": "build",    "section": "Build System",              "hidden": true }
+    {"type": "feat", "section": "Features"},
+    {"type": "fix", "section": "Bug Fixes"},
+    {"type": "perf", "section": "Performance Improvements"},
+    {"type": "refactor", "section": "Code Refactoring"},
+    {"type": "docs", "section": "Documentation"},
+    {"type": "deps", "section": "Dependencies"},
+    {"type": "revert", "section": "Reverts", "hidden": true},
+    {"type": "chore", "section": "Miscellaneous", "hidden": true},
+    {"type": "test", "section": "Tests", "hidden": true},
+    {"type": "ci", "section": "Continuous Integration", "hidden": true},
+    {"type": "style", "section": "Code Style", "hidden": true},
+    {"type": "build", "section": "Build System", "hidden": true}
   ],
   "packages": {
     "actions/nordvpn-es": {
       "component": "nordvpn-es",
       "changelog-path": "CHANGELOG.md",
-      "release-as": "0.1.0"
+      "initial-version": "0.1.0"
     },
     "actions/nordvpn-us": {
       "component": "nordvpn-us",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "initial-version": "0.1.0"
     },
     "actions/nordvpn-fr": {
       "component": "nordvpn-fr",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "initial-version": "0.1.0"
     }
   }
 }
