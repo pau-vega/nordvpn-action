@@ -35,11 +35,11 @@ chmod 600 "$AUTH_FILE"
 # Resolve a currently-online French openvpn_udp server via NordVPN's public
 # recommendations API. The original design assumed DNS round-robin at
 # `fr.nordvpn.com`, but that hostname does not exist as a DNS record — only
-# server-specific names like `frNNN.nordvpn.com` resolve. country_id=76 is
+# server-specific names like `frNNN.nordvpn.com` resolve. country_id=74 is
 # France; filters by openvpn_udp technology; limit=1 returns the lowest-load
 # online server. The --remote CLI flag overrides the config file's remote line.
 NORD_API='https://api.nordvpn.com/v1/servers/recommendations'
-NORD_QUERY='filters%5Bcountry_id%5D=76&filters%5Bservers_technologies%5D%5Bidentifier%5D=openvpn_udp&limit=1'
+NORD_QUERY='filters%5Bcountry_id%5D=74&filters%5Bservers_technologies%5D%5Bidentifier%5D=openvpn_udp&limit=1'
 if ! NORDVPN_REMOTE_HOST=$(curl -fsS --max-time 10 "${NORD_API}?${NORD_QUERY}" | jq -r '.[0].hostname'); then
   echo "::error::failed to query api.nordvpn.com for recommended FR server"
   exit 1
