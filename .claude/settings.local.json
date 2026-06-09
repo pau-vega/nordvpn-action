@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh api *)",
+      "Bash(claude mcp *)",
+      "Bash(ln -s AGENTS.md CLAUDE.md)",
+      "Bash(gh auth *)"
+    ]
+  }
+}

@@ -2,12 +2,13 @@
 # Primary provider: ipinfo.io/json returns .country as ISO-2.
 # Secondary provider: ifconfig.co/json returns .country_iso as ISO-2 (NOT .country — that's the full English name).
 # Primary must match expected country (hard fail). Secondary is advisory only.
+# Expected country arrives as positional $1 from the composite step (ES, US, or FR).
 set -euo pipefail
 # NEVER set -x (credentials in env would leak via transformed log lines).
 
 # Expected country: env override wins (chaos injection for `wrong-country` smoke mode),
-# otherwise positional $1, otherwise default "ES".
-EXPECTED="${SMOKE_EXPECT_COUNTRY:-${1:-ES}}"
+# otherwise positional $1. No silent default — the composite step always passes the value.
+EXPECTED="${SMOKE_EXPECT_COUNTRY:-${1:?usage: verify-country.sh EXPECTED_ISO2}}"
 
 # Brief stabilization delay: the tunnel just came up; the route through tun0 may
 # need a moment to propagate before outbound requests route correctly.

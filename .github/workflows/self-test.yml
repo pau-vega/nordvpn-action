@@ -15,13 +15,13 @@ on:
   workflow_dispatch:
     inputs:
       region:
-        description: 'Region to test'
+        description: 'Region to test (default: all)'
         type: choice
         options:
           - all       # default — test all 3 regions
-          - es
-          - us
-          - fr
+          - ES
+          - US
+          - FR
         default: 'all'
 
 permissions:
@@ -48,17 +48,18 @@ jobs:
             echo "is_fork=false" >> "$GITHUB_OUTPUT"
           fi
 
-  self-test-es:
+  self-test:
     needs: fork-check
     if: |
       needs.fork-check.outputs.is_fork == 'false' &&
-      (github.event_name != 'workflow_dispatch' || github.event.inputs.region == 'all' || github.event.inputs.region == 'es')
+      (github.event_name != 'workflow_dispatch' || github.event.inputs.region == 'all' || github.event.inputs.region == matrix.region)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: Preview
-    concurrency:
-      group: self-test-es-${{ github.ref }}
-      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        region: [ES, US, FR]
     steps:
       - name: Harden the runner (audit egress)
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
@@ -72,10 +73,11 @@ jobs:
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
-      - name: Connect NordVPN
+      - name: Connect NordVPN (${{ matrix.region }})
         id: connect
-        uses: ./actions/nordvpn-es
+        uses: ./actions/nordvpn
         with:
+          region: ${{ matrix.region }}
           username: ${{ secrets.NORDVPN_SERVICE_USERNAME }}
           password: ${{ secrets.NORDVPN_SERVICE_PASSWORD }}
 
@@ -87,10 +89,11 @@ jobs:
           TUN0_STATE: ${{ steps.connect.outputs.tun0-state }}
           DEFAULT_ROUTE: ${{ steps.connect.outputs.default-route }}
           CONNECT_DURATION: ${{ steps.connect.outputs.connect-duration-ms }}
+          EXPECTED_REGION: ${{ matrix.region }}
         run: |
           set -euo pipefail
 
-          echo "=== Post-connect verification for nordvpn-es ==="
+          echo "=== Post-connect verification for nordvpn region=${EXPECTED_REGION} ==="
 
           # Assert all 6 outputs are non-empty
           for var in EXIT_IP COUNTRY ASN TUN0_STATE DEFAULT_ROUTE CONNECT_DURATION; do
@@ -103,16 +106,16 @@ jobs:
           done
 
           # Assert country output matches expected
-          if [ "$COUNTRY" != "ES" ]; then
-            echo "::error::Country mismatch: action returned '${COUNTRY}', expected 'ES'"
+          if [ "$COUNTRY" != "$EXPECTED_REGION" ]; then
+            echo "::error::Country mismatch: action returned '${COUNTRY}', expected '${EXPECTED_REGION}'"
             exit 1
           fi
           echo "  ✓ country matches expected: ${COUNTRY}"
 
           # Workflow-level geo check via ipinfo.io
           GEO_COUNTRY="$(curl -fsS https://ipinfo.io/country)"
-          if [ "$GEO_COUNTRY" != "ES" ]; then
-            echo "::error::Geo check failed: ipinfo.io returned '${GEO_COUNTRY}', expected 'ES'"
+          if [ "$GEO_COUNTRY" != "$EXPECTED_REGION" ]; then
+            echo "::error::Geo check failed: ipinfo.io returned '${GEO_COUNTRY}', expected '${EXPECTED_REGION}'"
             exit 1
           fi
           echo "  ✓ ipinfo.io geo check: ${GEO_COUNTRY}"
@@ -120,145 +123,11 @@ jobs:
           echo "=== All verifications passed ==="
 
       - name: Disconnect VPN
-        uses: ./actions/nordvpn-es/disconnect
-        if: always()
-
-  self-test-us:
-    needs: fork-check
-    if: |
-      needs.fork-check.outputs.is_fork == 'false' &&
-      (github.event_name != 'workflow_dispatch' || github.event.inputs.region == 'all' || github.event.inputs.region == 'us')
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    environment: Preview
-    concurrency:
-      group: self-test-us-${{ github.ref }}
-      cancel-in-progress: false
-    steps:
-      - name: Harden the runner (audit egress)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
-        with:
-          egress-policy: audit
-
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-
-      - name: Connect NordVPN
-        id: connect
-        uses: ./actions/nordvpn-us
-        with:
-          username: ${{ secrets.NORDVPN_SERVICE_USERNAME }}
-          password: ${{ secrets.NORDVPN_SERVICE_PASSWORD }}
-
-      - name: Post-connect verify
-        env:
-          EXIT_IP: ${{ steps.connect.outputs.exit-ip }}
-          COUNTRY: ${{ steps.connect.outputs.country }}
-          ASN: ${{ steps.connect.outputs.asn }}
-          TUN0_STATE: ${{ steps.connect.outputs.tun0-state }}
-          DEFAULT_ROUTE: ${{ steps.connect.outputs.default-route }}
-          CONNECT_DURATION: ${{ steps.connect.outputs.connect-duration-ms }}
-        run: |
-          set -euo pipefail
-
-          echo "=== Post-connect verification for nordvpn-us ==="
-
-          for var in EXIT_IP COUNTRY ASN TUN0_STATE DEFAULT_ROUTE CONNECT_DURATION; do
-            val="${!var}"
-            if [ -z "$val" ]; then
-              echo "::error::Output '${var,,}' is empty — action did not populate output"
-              exit 1
-            fi
-            echo "  ${var,,}: ${val}"
-          done
-
-          if [ "$COUNTRY" != "US" ]; then
-            echo "::error::Country mismatch: action returned '${COUNTRY}', expected 'US'"
-            exit 1
-          fi
-          echo "  ✓ country matches expected: ${COUNTRY}"
-
-          GEO_COUNTRY="$(curl -fsS https://ipinfo.io/country)"
-          if [ "$GEO_COUNTRY" != "US" ]; then
-            echo "::error::Geo check failed: ipinfo.io returned '${GEO_COUNTRY}', expected 'US'"
-            exit 1
-          fi
-          echo "  ✓ ipinfo.io geo check: ${GEO_COUNTRY}"
-
-          echo "=== All verifications passed ==="
-
-      - name: Disconnect VPN
-        uses: ./actions/nordvpn-us/disconnect
-        if: always()
-
-  self-test-fr:
-    needs: fork-check
-    if: |
-      needs.fork-check.outputs.is_fork == 'false' &&
-      (github.event_name != 'workflow_dispatch' || github.event.inputs.region == 'all' || github.event.inputs.region == 'fr')
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    environment: Preview
-    concurrency:
-      group: self-test-fr-${{ github.ref }}
-      cancel-in-progress: false
-    steps:
-      - name: Harden the runner (audit egress)
-        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
-        with:
-          egress-policy: audit
-
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-
-      - name: Connect NordVPN
-        id: connect
-        uses: ./actions/nordvpn-fr
-        with:
-          username: ${{ secrets.NORDVPN_SERVICE_USERNAME }}
-          password: ${{ secrets.NORDVPN_SERVICE_PASSWORD }}
-
-      - name: Post-connect verify
-        env:
-          EXIT_IP: ${{ steps.connect.outputs.exit-ip }}
-          COUNTRY: ${{ steps.connect.outputs.country }}
-          ASN: ${{ steps.connect.outputs.asn }}
-          TUN0_STATE: ${{ steps.connect.outputs.tun0-state }}
-          DEFAULT_ROUTE: ${{ steps.connect.outputs.default-route }}
-          CONNECT_DURATION: ${{ steps.connect.outputs.connect-duration-ms }}
-        run: |
-          set -euo pipefail
-
-          echo "=== Post-connect verification for nordvpn-fr ==="
-
-          for var in EXIT_IP COUNTRY ASN TUN0_STATE DEFAULT_ROUTE CONNECT_DURATION; do
-            val="${!var}"
-            if [ -z "$val" ]; then
-              echo "::error::Output '${var,,}' is empty — action did not populate output"
-              exit 1
-            fi
-            echo "  ${var,,}: ${val}"
-          done
-
-          if [ "$COUNTRY" != "FR" ]; then
-            echo "::error::Country mismatch: action returned '${COUNTRY}', expected 'FR'"
-            exit 1
-          fi
-          echo "  ✓ country matches expected: ${COUNTRY}"
-
-          GEO_COUNTRY="$(curl -fsS https://ipinfo.io/country)"
-          if [ "$GEO_COUNTRY" != "FR" ]; then
-            echo "::error::Geo check failed: ipinfo.io returned '${GEO_COUNTRY}', expected 'FR'"
-            exit 1
-          fi
-          echo "  ✓ ipinfo.io geo check: ${GEO_COUNTRY}"
-
-          echo "=== All verifications passed ==="
-
-      - name: Disconnect VPN
-        uses: ./actions/nordvpn-fr/disconnect
+        uses: ./actions/nordvpn/disconnect
         if: always()
 
   drift-issue:
-    needs: [self-test-es, self-test-us, self-test-fr]
+    needs: [self-test]
     if: ${{ failure() && github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -301,7 +170,7 @@ jobs:
           fi
 
   drift-close:
-    needs: [self-test-es, self-test-us, self-test-fr]
+    needs: [self-test]
     if: ${{ success() && github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5

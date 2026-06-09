@@ -1,15 +1,27 @@
 #!/usr/bin/env bash
 # Writes credentials to a 0600 file in $RUNNER_TEMP, starts openvpn --daemon against
-# .github/vpn/nordvpn-es.ovpn, and polls `ip -4 addr show tun0` until an IPv4 is assigned
+# vpn/nordvpn.ovpn, and polls `ip -4 addr show tun0` until an IPv4 is assigned
 # (NOT the daemon's exit code — it forks and exits 0 before the handshake completes).
+# Country is selected by the COUNTRY_CODE env var (ES / US / FR) set by the composite step.
 set -euo pipefail
 # NEVER set -x — any transformation bypasses GitHub's exact-match log masking.
 
-# Ubuntu-only guard (NVES-06, AGENTS.md Security section)
+# Ubuntu-only guard (AGENTS.md Security section)
 if [[ "${RUNNER_OS:-}" != "Linux" ]]; then
   echo "::error::Ubuntu runner required (detected ${RUNNER_OS:-unknown})"
   exit 1
 fi
+
+# Region is passed via env from the composite step. Validate and look up the
+# NordVPN country_id used by the recommendations API.
+: "${COUNTRY_CODE:?COUNTRY_CODE env var required (ES, US, or FR)}"
+case "$COUNTRY_CODE" in
+  ES) COUNTRY_ID=202 ;;
+  US) COUNTRY_ID=228 ;;
+  FR) COUNTRY_ID=74  ;;
+  *)  echo "::error::Unsupported region: ${COUNTRY_CODE} (supported: ES, US, FR)"
+      exit 1 ;;
+esac
 
 # Credentials must arrive via env vars set by the composite step.
 # The `: "${VAR:?message}"` idiom fails loudly under set -u if the caller forgot them.
@@ -24,7 +36,7 @@ fi
 
 AUTH_FILE="$RUNNER_TEMP/nordvpn-auth.txt"
 PID_FILE="$RUNNER_TEMP/openvpn.pid"
-CONFIG_FILE="${GITHUB_ACTION_PATH}/vpn/nordvpn-es.ovpn"
+CONFIG_FILE="${GITHUB_ACTION_PATH}/vpn/nordvpn.ovpn"
 
 # Auth file at 0600 in $RUNNER_TEMP (outside workspace globs, auto-cleaned by runner).
 # Use printf (deterministic) NOT echo (shell-dependent escape interpretation).
@@ -32,20 +44,21 @@ umask 077
 printf '%s\n%s\n' "$NORDVPN_USERNAME" "$NORDVPN_PASSWORD" > "$AUTH_FILE"
 chmod 600 "$AUTH_FILE"
 
-# Resolve a currently-online Spanish openvpn_udp server via NordVPN's public
-# recommendations API. The original design assumed DNS round-robin at
-# `es.nordvpn.com`, but that hostname does not exist as a DNS record — only
-# server-specific names like `esNNN.nordvpn.com` resolve. country_id=202 is
-# Spain; filters by openvpn_udp technology; limit=1 returns the lowest-load
+# Resolve a currently-online openvpn_udp server for the selected country via
+# NordVPN's public recommendations API. The original design assumed DNS
+# round-robin at `<region>.nordvpn.com`, but that hostname does not exist as a
+# DNS record — only server-specific names like `esNNN.nordvpn.com` resolve.
+# `filters[country_id]` is resolved from COUNTRY_CODE via the case statement
+# above; filters by openvpn_udp technology; limit=1 returns the lowest-load
 # online server. The --remote CLI flag overrides the config file's remote line.
 NORD_API='https://api.nordvpn.com/v1/servers/recommendations'
-NORD_QUERY='filters%5Bcountry_id%5D=202&filters%5Bservers_technologies%5D%5Bidentifier%5D=openvpn_udp&limit=1'
+NORD_QUERY="filters%5Bcountry_id%5D=${COUNTRY_ID}&filters%5Bservers_technologies%5D%5Bidentifier%5D=openvpn_udp&limit=1"
 if ! NORDVPN_REMOTE_HOST=$(curl -fsS --max-time 10 "${NORD_API}?${NORD_QUERY}" | jq -r '.[0].hostname'); then
-  echo "::error::failed to query api.nordvpn.com for recommended ES server"
+  echo "::error::failed to query api.nordvpn.com for recommended ${COUNTRY_CODE} server"
   exit 1
 fi
 if [[ -z "$NORDVPN_REMOTE_HOST" || "$NORDVPN_REMOTE_HOST" == "null" ]]; then
-  echo "::error::api.nordvpn.com returned empty hostname for ES openvpn_udp"
+  echo "::error::api.nordvpn.com returned empty hostname for ${COUNTRY_CODE} openvpn_udp"
   exit 1
 fi
 echo "[connect.sh] NordVPN server: $NORDVPN_REMOTE_HOST"
