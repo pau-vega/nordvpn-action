@@ -87,13 +87,17 @@ Composite actions do **not** support `post:` ([community discussion #26743](http
 
 All `uses:` lines pin a 40-char SHA + trailing `# vX.Y.Z` comment. Dependabot reads the comment and updates both atomically. Floating tags (`@v5`, `@main`) fail OpenSSF Scorecard.
 
-Canonical SHAs:
+Canonical SHAs (as pinned in this repo's workflows):
 
 ```
-actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd                  # v6.0.2
+actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10                  # v6.0.3
 googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7  # v5.0.0
 reviewdog/action-actionlint@6fb7acc99f4a1008869fa8a0f09cfca740837d9d       # v1.72.0
 ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38         # 2.0.0
+ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a              # v2.4.3
+github/codeql-action/*@8aad20d150bbac5944a9f9d289da16a4b0d87c1e            # v4.36.2
+step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411       # v2.19.4
+actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a            # v7.0.1
 ```
 
 ### Banned constructs
@@ -107,11 +111,10 @@ ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38         # 2.0
 
 Required from commit #1. release-please depends on commit-history shape; do not retrofit.
 
-- **Pre-consolidation (Phase 1) scopes:** `scaf`, `lint`, `chore`, `docs`.
 - **Action scopes:** `feat(nordvpn)`, `fix(nordvpn)`, or no scope for cross-cutting changes. The region is encoded in the commit body, not the scope, since all regions ship as one action.
 - **Workflow scopes:** `fix(self-test)`, `lint(actionlint)`, etc.
 - **`deps:` type** is surfaced in changelogs (Dependabot uses this prefix).
-- **Files release-please OWNS — do not hand-edit:** `.release-please-manifest.json`, `actions/*/CHANGELOG.md`.
+- **Files release-please OWNS — do not hand-edit:** `.release-please-manifest.json`, `actions/*/CHANGELOG.md`. Hand-editing breaks the next release.
 
 ## Self-test workflow shape
 
@@ -134,7 +137,7 @@ No project skills found. Add skills to any of: `.claude/skills/`, `.agents/skill
 
 ## GSD Workflow Enforcement
 
-Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync. These are project-specific slash commands (not built into OpenCode/Claude Code) defined in `.claude/commands/`.
 
 Use these entry points:
 - `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
