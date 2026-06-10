@@ -1,6 +1,6 @@
-# NordVPN French Egress (composite action)
+# NordVPN Egress (composite action)
 
-Connects the current GitHub Actions runner to a NordVPN French exit node, verifies `country=FR` against two independent geo providers, and exposes a diagnostics bundle as step outputs. Intended to be consumed from any repo via `uses:`. Teardown lives in the sibling `disconnect/` sub-action.
+Connects the current GitHub Actions runner to a NordVPN exit node in a selectable country (ES, US, FR), verifies the exit-country against two independent geo providers, and exposes a diagnostics bundle as step outputs. Intended to be consumed from any repo via `uses:`. Teardown lives in the sibling `disconnect/` sub-action.
 
 > **Teardown constraint:** composite actions do not support `post:` ([GitHub Community Discussion #26743](https://github.com/orgs/community/discussions/26743)). The caller workflow MUST invoke the `/disconnect` sub-action as a sibling step with `if: always()`. See the Usage section below.
 
@@ -8,6 +8,7 @@ Connects the current GitHub Actions runner to a NordVPN French exit node, verifi
 
 | Name | Required | Description |
 |------|----------|-------------|
+| `region` | yes | ISO-2 country code for the exit node. Supported: `ES` (Spain, country_id=202), `US` (United States, country_id=228), `FR` (France, country_id=74). |
 | `username` | yes | NordVPN service username. In consumer repos, sourced from a `Preview` environment secret like `NORDVPN_SERVICE_USERNAME`. |
 | `password` | yes | NordVPN service password. In consumer repos, sourced from a `Preview` environment secret like `NORDVPN_SERVICE_PASSWORD`. |
 
@@ -17,8 +18,8 @@ NordVPN **service** credentials are required — NordVPN account email/password 
 
 | Name | Description |
 |------|-------------|
-| `exit-ip` | Public IPv4 after tunnel up (NordVPN French gateway). |
-| `country` | ISO-2 country code of exit IP; guaranteed `FR` on action success. |
+| `exit-ip` | Public IPv4 after tunnel up (NordVPN exit gateway in the selected country). |
+| `country` | ISO-2 country code of exit IP; guaranteed to match the `region` input on action success. |
 | `asn` | ASN/ISP of the exit gateway (string). |
 | `tun0-state` | Human-readable tunnel state: `up` or `down-or-missing`. |
 | `default-route` | Active IPv4 default route after connect (string). |
@@ -36,16 +37,17 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Connect NordVPN (FR)
+      - name: Connect NordVPN (ES)
         id: vpn
-        uses: pau-vega/nordvpn-action/actions/nordvpn-fr@<40-char-SHA> # vX.Y.Z
+        uses: pau-vega/nordvpn-action/actions/nordvpn@<40-char-SHA> # vX.Y.Z
         with:
+          region: ES
           username: ${{ secrets.NORDVPN_SERVICE_USERNAME }}
           password: ${{ secrets.NORDVPN_SERVICE_PASSWORD }}
 
       - name: Disconnect VPN
         if: always()
-        uses: pau-vega/nordvpn-action/actions/nordvpn-fr/disconnect@<40-char-SHA> # vX.Y.Z
+        uses: pau-vega/nordvpn-action/actions/nordvpn/disconnect@<40-char-SHA> # vX.Y.Z
 ```
 
 - Use the 40-character commit SHA for deterministic pinning. The `# vX.Y.Z` comment is for human readability (Dependabot updates both atomically).
@@ -59,8 +61,8 @@ jobs:
 The composite runs three sequential steps:
 
 1. **Install** — `apt-get install openvpn openvpn-systemd-resolved`, asserts `curl`/`jq`/`openvpn` are on PATH.
-2. **Connect (bounded retry)** — up to 2 attempts: writes service credentials to `$RUNNER_TEMP/nordvpn-auth.txt` at 0600, starts `openvpn --daemon` against the bundled `nordvpn-fr.ovpn`, polls `ip -4 addr show tun0` for an assigned IPv4 address (30s timeout, 2s interval).
-3. **Verify** — queries `ipinfo.io/json` (primary) and `ifconfig.co/json` (secondary). Both must independently return `FR`. Emits the six-field diagnostics bundle above to `$GITHUB_OUTPUT`.
+2. **Connect (bounded retry)** — up to 2 attempts: writes service credentials to `$RUNNER_TEMP/nordvpn-auth.txt` at 0600, resolves a live openvpn_udp server in the selected country via NordVPN's public recommendations API, starts `openvpn --daemon` against the bundled `nordvpn.ovpn` (the `--remote` CLI flag overrides the config's placeholder hostname), polls `ip -4 addr show tun0` for an assigned IPv4 address (30s timeout, 2s interval).
+3. **Verify** — queries `ipinfo.io/json` (primary) and `ifconfig.co/json` (secondary). Both must independently return the requested region. Emits the six-field diagnostics bundle above to `$GITHUB_OUTPUT`.
 
 Any step failing exits the composite non-zero. The caller's `if: always()` disconnect step still runs on failure or cancellation.
 
@@ -83,7 +85,7 @@ Rotate `NORDVPN_SERVICE_USERNAME` / `NORDVPN_SERVICE_PASSWORD` without any code 
 3. **Verify with the next workflow run.** Open (or re-run) any pull request whose
    e2e job uses this action. The action picks up the new credentials automatically on
    the next run. In the run's Step Summary look for the **VPN diagnostics**
-   `::notice::` annotation and confirm `country: FR` plus a fresh `exit-ip`.
+   `::notice::` annotation and confirm `country: <region>` plus a fresh `exit-ip`.
 
 4. **Revoke the old credentials.** Once the new credentials are verified in a green
    run, revoke the old service credentials from the NordVPN dashboard.
@@ -95,18 +97,29 @@ Three pin forms, ordered from strongest to weakest reproducibility guarantee:
 | Pin form | Example | Use when |
 |----------|---------|----------|
 | Commit SHA | `@a1b2c3d4e5f60718293a4b5c6d7e8f9012345678` (40 chars) | You need byte-for-byte reproducibility and immunity to tag re-pointing. Recommended for release-critical workflows. |
-| Exact version tag | `@nordvpn-fr-v1.0.1` | You want a specific, frozen version without the SHA noise. Produced by [release-please](https://github.com/googleapis/release-please) on every automated release. |
-| Floating major tag | `@nordvpn-fr-v1` | You want automatic non-breaking updates on every `v1.x.y` release. Force-moved by the CI on every new `nordvpn-fr-v1.x.y` release. |
+| Exact version tag | `@nordvpn-v1.0.1` | You want a specific, frozen version without the SHA noise. Produced by [release-please](https://github.com/googleapis/release-please) on every automated release. |
+| Floating major tag | `@nordvpn-v1` | You want automatic non-breaking updates on every `v1.x.y` release. Force-moved by the CI on every new `nordvpn-v1.x.y` release. |
 
 **Never use `@main`** — it is not a recommended pin form. Floating tags like `@main` fail the OpenSSF Scorecard "pinned-dependencies" check. The `@main` branch is a moving target and provides no reproducibility guarantee.
 
-Automated releases are cut by [release-please](https://github.com/googleapis/release-please) whenever a conventional commit lands under `actions/nordvpn-fr/**`. The resulting tag is `nordvpn-fr-vX.Y.Z` and the floating `nordvpn-fr-v1` tag is force-updated to the same commit.
+Automated releases are cut by [release-please](https://github.com/googleapis/release-please) whenever a conventional commit lands under `actions/nordvpn/**`. The resulting tag is `nordvpn-vX.Y.Z` and the floating `nordvpn-v1` tag is force-updated to the same commit.
 
 Following the pinned-action posture used by this repo's own CI (see `.github/workflows/actions-lint.yml`), **pin SHA for reproducibility** unless you specifically want auto-updates on the `v1` line.
 
-The `nordvpn-fr-v1` tag is force-moved on every release. For reproducibility, pin SHA.
+The `nordvpn-v1` tag is force-moved on every release. For reproducibility, pin SHA.
 
-### Troubleshooting
+## Adding a new region
+
+The action supports `ES` (country_id=202), `US` (country_id=228), and `FR` (country_id=74). To add another:
+
+1. Look up the NordVPN `country_id` for the new ISO-2 code at `https://api.nordvpn.com/v1/servers/countries`.
+2. Add a `case` arm in `actions/nordvpn/scripts/connect.sh` mapping the ISO-2 code to that `country_id`.
+3. Add the ISO-2 code to the `region` matrix in `.github/workflows/self-test.yml` so the self-test covers it.
+4. Document the new region in the Inputs table above.
+
+No new action directory, no new scripts, no new release-please package, no per-region tag scheme — the single `nordvpn-vX.Y.Z` tag covers all regions.
+
+## Troubleshooting
 
 - **`connect.sh` fails with `AUTH_FAILED` in the OpenVPN log.** The service
   credentials were copy-pasted with leading/trailing whitespace, or they were saved
@@ -119,7 +132,11 @@ The `nordvpn-fr-v1` tag is force-moved on every release. For reproducibility, pi
   `pull_request_target`) or the secrets are missing from the `Preview` environment.
   Re-run from a maintainer branch, or add the missing secrets.
 
-- **Country mismatch (`country != FR`) in the VPN diagnostics table.** The
+- **`::error::Unsupported region: <code> (supported: ES, US, FR)`.** The `region`
+  input was set to an ISO-2 code the action does not yet support. Either change
+  the value to ES, US, or FR, or follow the "Adding a new region" steps above.
+
+- **Country mismatch (`country != region`) in the VPN diagnostics table.** The
   two-provider verification hard-fails before downstream jobs run; the Connect step
   will show red. Check which NordVPN server handled the run via the `asn` /
   `exit-ip` fields in the diagnostics `::notice::` annotation, and re-run the PR.
@@ -135,7 +152,7 @@ The `nordvpn-fr-v1` tag is force-moved on every release. For reproducibility, pi
   `AUTH_FAILED` (wrong credentials), API returned a decommissioned server, or
   network issues on the runner.
 
-- **`::error::country mismatch: primary=ES secondary=ES expected=FR`.** Both
-  geo providers returned a non-French exit IP. This indicates NordVPN routed
+- **`::error::country mismatch: primary=FR secondary=FR expected=ES`.** Both
+  geo providers returned a non-Spanish exit IP. This indicates NordVPN routed
   to a different country. Check the `asn` and `exit-ip` in the diagnostics
   to identify the server, then re-run.

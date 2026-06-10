@@ -3,7 +3,7 @@
 #
 # Idempotently enables branch protection on `main` for pau-vega/nordvpn-action.
 # Required checks: actionlint, shellcheck, block-pull-request-target (from actions-lint.yml)
-# + self-test (nordvpn-es), self-test (nordvpn-us), self-test (nordvpn-fr) (from self-test.yml).
+# + self-test matrix jobs (ES, US, FR) from self-test.yml.
 #
 # Usage:
 #   gh auth login                      # one-time, if not already authenticated
@@ -11,8 +11,7 @@
 #
 # Re-run after:
 #   - First creation of the remote repo (initial enable).
-#   - Renaming or adding required-check job names (Phase 4 amends to add
-#     `self-test` matrix jobs — TEST-09).
+#   - Renaming or adding required-check job names.
 #   - Drift recovery (someone manually disabled protection in the GitHub UI).
 #
 # See .planning/phases/01-scaffolding-lint/01-CONTEXT.md
@@ -25,22 +24,18 @@ OWNER="pau-vega"
 REPO="nordvpn-action"
 BRANCH="main"
 
-# The required check names MUST match the `name:` field of each job in
-# .github/workflows/actions-lint.yml + the per-region jobs in
-# .github/workflows/self-test.yml. If those names change, update this list.
-# Phase 4 (TEST-09): self-test added three per-region jobs — 6 total checks.
-# NOTE: self-test jobs are top-level (`self-test-es` / `self-test-us` / `self-test-fr`),
-# NOT a matrix strategy — so the GitHub check-run names match the job IDs exactly
-# (no parenthesized matrix suffix). The earlier parenthesized form
-# (`self-test (nordvpn-es)`) was never reported by GitHub and blocked every PR
-# from merging — fixed by aligning the contexts with the actual job names.
+# The required check names MUST match the GitHub-reported check-run names.
+# `self-test` is now a matrix job with `region: [ES, US, FR]`, so GitHub
+# appends the matrix value in parentheses to the job name:
+#   self-test (ES), self-test (US), self-test (FR)
+# If those names change (job rename or matrix key change), update this list.
 REQUIRED_CHECKS_JSON='[
   {"context": "actionlint",                "app_id": -1},
   {"context": "shellcheck",                "app_id": -1},
   {"context": "block-pull-request-target", "app_id": -1},
-  {"context": "self-test-es",              "app_id": -1},
-  {"context": "self-test-us",              "app_id": -1},
-  {"context": "self-test-fr",              "app_id": -1}
+  {"context": "self-test (ES)",            "app_id": -1},
+  {"context": "self-test (US)",            "app_id": -1},
+  {"context": "self-test (FR)",            "app_id": -1}
 ]'
 
 # Pre-flight: confirm gh CLI is installed and authenticated.
@@ -67,7 +62,7 @@ echo "Enabling branch protection on ${OWNER}/${REPO}@${BRANCH}..."
 # PUT /repos/{owner}/{repo}/branches/{branch}/protection — full replace, naturally idempotent.
 # Settings ENABLED (D-15 + D-16):
 #   - required_status_checks.strict=true (require branch up-to-date before merge)
-#   - required_status_checks.checks: 3 job names from Plan 03
+#   - required_status_checks.checks: 3 lint job names + 3 self-test matrix names
 #   - enforce_admins=true (D-16: admins do NOT bypass)
 #   - required_pull_request_reviews with 0 required approvals (D-15: solo repo, no second human)
 #
@@ -102,7 +97,7 @@ EOF
 
 echo ""
 echo "Branch protection enabled on ${OWNER}/${REPO}@${BRANCH}."
-echo "Required checks: actionlint, shellcheck, block-pull-request-target, self-test (nordvpn-es), self-test (nordvpn-us), self-test (nordvpn-fr)"
+echo "Required checks: actionlint, shellcheck, block-pull-request-target, self-test (ES), self-test (US), self-test (FR)"
 echo "Admins enforced: yes (no bypass)"
 echo "PR reviews: required (0 approvals — solo repo)"
 echo ""

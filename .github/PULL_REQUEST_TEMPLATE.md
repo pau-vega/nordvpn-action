@@ -8,14 +8,14 @@ Thanks for the PR. Please fill the sections below — they mirror the checks the
 
 ## Affected region(s)
 
-<!-- Tick exactly one of the top three for region-specific changes. Cross-cutting? Tick "Not region-specific". -->
+<!-- Tick all that apply for region-specific changes. The action takes a single `region:` input (ES / US / FR), but a single PR can touch multiple regions if the change is in shared code. Cross-cutting? Tick "Not region-specific". -->
 
-- [ ] `nordvpn-es` (Spain)
-- [ ] `nordvpn-us` (United States)
-- [ ] `nordvpn-fr` (France)
-- [ ] Not region-specific (CI, docs, release tooling, etc.)
+- [ ] `ES` (Spain)
+- [ ] `US` (United States)
+- [ ] `FR` (France)
+- [ ] Not region-specific (CI, docs, release tooling, shared scripts, etc.)
 
-> One region per PR. Mixing ES + US + FR splits release-please across multiple PRs and the changelog gets messy. See [`.github/CONTRIBUTING.md`](./CONTRIBUTING.md) §What counts as a good PR.
+> Since all regions ship as one action, changes to `connect.sh` / `verify-country.sh` / `.ovpn` / `action.yml` typically touch every region. Pick "Not region-specific" if the change is in shared code.
 
 ## Type of change
 
@@ -29,21 +29,21 @@ Thanks for the PR. Please fill the sections below — they mirror the checks the
 
 ## Conventional Commit scope used
 
-<!-- Paste the actual subject line from your commit(s), e.g. `fix(nordvpn-us): retry on transient API 503`. -->
+<!-- Paste the actual subject line from your commit(s), e.g. `fix(nordvpn): retry on transient API 503`. -->
 
 ```
 ```
 
 ## Checklist
 
-- [ ] Followed [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) — type and scope match the affected region or `lint` / `chore`.
+- [ ] Followed [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) — type and scope match the change.
 - [ ] `actionlint .github/workflows/*.yml` runs clean locally (or CI is green on this PR).
 - [ ] `shellcheck actions/**/scripts/*.sh` runs clean locally (or CI is green).
 - [ ] Did NOT hand-edit `.release-please-manifest.json` or `actions/*/CHANGELOG.md` — release-please owns those files.
 - [ ] All new `uses:` lines pin a 40-char SHA with a trailing `# vX.Y.Z` comment. No `@main`, no `@v5`.
 - [ ] If a new workflow was added, it has a top-level `permissions:` block and per-job `timeout-minutes`.
 - [ ] If `actions/**/scripts/**` was touched, no `set -x` was introduced. (`set -x` leaks secrets past GitHub's exact-match masking — see [`AGENTS.md`](../AGENTS.md) §Banned constructs.)
-- [ ] If this changes a frozen v1 contract (input names, output names, the six-output shape), the body below explains the migration path.
+- [ ] If this changes a frozen v1 contract (input names, output names, the six-output shape, the `nordvpn-vX.Y.Z` tag format), the body below explains the migration path.
 
 ## Self-test
 

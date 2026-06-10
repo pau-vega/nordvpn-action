@@ -74,9 +74,8 @@ check_req "SCAF-01" "LICENSE has warranty disclaimer" grep -qE 'WITHOUT WARRANTY
 
 # SCAF-02: README.md has action index section
 check_req "SCAF-02" "README has '## Available actions'" grep -qE '^## Available actions$' README.md
-check_req "SCAF-02" "README lists nordvpn-es" grep -qE 'nordvpn-es' README.md
-check_req "SCAF-02" "README lists nordvpn-us" grep -qE 'nordvpn-us' README.md
-check_req "SCAF-02" "README lists nordvpn-fr" grep -qE 'nordvpn-fr' README.md
+check_req "SCAF-02" "README lists nordvpn action" grep -qE 'actions/nordvpn@' README.md
+check_req "SCAF-02" "README documents region input" grep -qE 'region' README.md
 
 # SCAF-03: README.md has three-pin-form chapter
 check_req "SCAF-03" "README has '## Pin forms'" grep -qE '^## Pin forms$' README.md
@@ -122,13 +121,13 @@ echo "--- Plan 02: GitHub Config ---"
 check_req "SCAF-04" "CODEOWNERS exists" test -f .github/CODEOWNERS
 check_req "SCAF-04" "CODEOWNERS has /actions/** @pau-vega" grep -qE '/actions/\*\* @pau-vega' .github/CODEOWNERS
 check_req "SCAF-04" "No global catch-all in CODEOWNERS" bash -c '! grep -qE "^\* @" .github/CODEOWNERS'
-check_req "SCAF-04" "No per-region literals in CODEOWNERS" bash -c '! grep -qE "/actions/nordvpn-" .github/CODEOWNERS'
+check_req "SCAF-04" "No per-region literals in CODEOWNERS" bash -c '! grep -qE "/actions/nordvpn-(es|us|fr)" .github/CODEOWNERS'
 
 # SCAF-05: Dependabot with plural directories
 check_req "SCAF-05" "Dependabot exists" test -f .github/dependabot.yml
 check_req "SCAF-05" "Dependabot has plural 'directories:'" grep -qE 'directories:' .github/dependabot.yml
 check_req "SCAF-05" "No singular 'directory:'" bash -c '! grep -qE "^\s+directory:" .github/dependabot.yml'
-check_req "SCAF-05" "Dependabot has 7 paths" bash -c '[ "$(grep -cE "^\s+- \"/" .github/dependabot.yml)" = "7" ]'
+check_req "SCAF-05" "Dependabot has 3 paths" bash -c '[ "$(grep -cE "^\s+- \"/" .github/dependabot.yml)" = "3" ]'
 check_req "SCAF-05" "Dependabot has weekly schedule" grep -qE 'interval: "weekly"' .github/dependabot.yml
 check_req "SCAF-05" "Dependabot deps prefix" grep -qE 'prefix: "deps"' .github/dependabot.yml
 

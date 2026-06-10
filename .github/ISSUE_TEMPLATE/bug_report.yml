@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a failure or incorrect behavior in one of the nordvpn-* actions.
+description: Report a failure or incorrect behavior in the nordvpn action.
 title: "[bug] <region>: <summary>"
 labels: ["bug"]
 body:
@@ -14,11 +14,11 @@ body:
     id: region
     attributes:
       label: Affected region
-      description: Which composite action is failing?
+      description: Which exit-country input is failing? (The action takes a single `region` input: ES, US, or FR.)
       options:
-        - nordvpn-es (Spain)
-        - nordvpn-us (United States)
-        - nordvpn-fr (France)
+        - ES (Spain)
+        - US (United States)
+        - FR (France)
         - More than one region
         - Not region-specific (CI, docs, release tooling, etc.)
     validations:
@@ -28,8 +28,8 @@ body:
     id: pinned-ref
     attributes:
       label: Pinned ref
-      description: "The SHA or tag your workflow pins (the value after `@` in `uses: pau-vega/nordvpn-action/actions/nordvpn-<region>@<ref>`)."
-      placeholder: "e.g. de0fac2e4500dabe0009e67214ff5f5447ce83dd  or  nordvpn-es-v1.0.0  or  nordvpn-es-v1"
+      description: "The SHA or tag your workflow pins (the value after `@` in `uses: pau-vega/nordvpn-action/actions/nordvpn@<ref>`)."
+      placeholder: "e.g. de0fac2e4500dabe0009e67214ff5f5447ce83dd  or  nordvpn-v1.0.0  or  nordvpn-v1"
     validations:
       required: true
 
@@ -92,9 +92,9 @@ body:
     attributes:
       label: Pre-submit checks
       options:
-        - label: I confirmed the same behavior on the latest tagged release of the affected region.
+        - label: I confirmed the same behavior on the latest tagged release.
           required: false
-        - label: I checked the [per-region README troubleshooting section](https://github.com/pau-vega/nordvpn-action/tree/main/actions) and did not find a documented cause.
+        - label: I checked the [action README troubleshooting section](./actions/nordvpn/README.md) and did not find a documented cause.
           required: false
         - label: This is not a security or credential-handling issue. (If it is — close this and use the private channel in [`SECURITY.md`](../SECURITY.md).)
           required: true

@@ -17,3 +17,4 @@
 # Local-only test artifacts (the action itself writes auth files under
 # $RUNNER_TEMP on a runner — these never live in the repo).
 *.local
+.opencode/

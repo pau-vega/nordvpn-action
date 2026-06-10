@@ -1,10 +1,13 @@
 # GitHub Docs metadata syntax: https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax
-name: "NordVPN French Egress"
-description: "Connect the runner to a NordVPN French exit node, verify country=FR, expose diagnostics. Teardown is the caller's `if: always()` sibling step — composite actions do not support `post:`."
+name: "NordVPN Egress"
+description: "Connect the runner to a NordVPN exit node in a selectable country (ES/US/FR), verify the geo-IP, expose diagnostics. Teardown is the caller's `if: always()` sibling step — composite actions do not support `post:`."
 branding:
   icon: "lock"
   color: "blue"
 inputs:
+  region:
+    description: "ISO-2 country code for the exit node. Supported: ES (Spain), US (United States), FR (France)."
+    required: true
   username:
     description: "NordVPN service username (from Preview env secret NORDVPN_SERVICE_USERNAME)."
     required: true
@@ -16,7 +19,7 @@ outputs:
     description: "Public IPv4 after tunnel up."
     value: ${{ steps.verify.outputs.exit-ip }}
   country:
-    description: "ISO-2 country code of exit IP (must equal FR)."
+    description: "ISO-2 country code of exit IP (must equal the input region)."
     value: ${{ steps.verify.outputs.country }}
   asn:
     description: "ASN/ISP of the exit gateway."
@@ -37,9 +40,10 @@ runs:
       shell: bash
       run: bash "${{ github.action_path }}/scripts/install.sh"
 
-    - name: Connect NordVPN (France) - bounded retry (up to 2 attempts)
+    - name: Connect NordVPN (${{ inputs.region }}) - bounded retry (up to 2 attempts)
       shell: bash
       env:
+        COUNTRY_CODE: ${{ inputs.region }}
         NORDVPN_USERNAME: ${{ inputs.username }}
         NORDVPN_PASSWORD: ${{ inputs.password }}
       run: |
@@ -59,7 +63,7 @@ runs:
         echo "::error::connect failed after ${attempts} attempts"
         exit 1
 
-    - name: Verify French egress (two independent geo providers)
+    - name: Verify ${{ inputs.region }} egress (two independent geo providers)
       id: verify
       shell: bash
-      run: bash "${{ github.action_path }}/scripts/verify-country.sh" FR
+      run: bash "${{ github.action_path }}/scripts/verify-country.sh" "${{ inputs.region }}"

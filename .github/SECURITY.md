@@ -1,17 +1,15 @@
 # Security Policy
 
-`pau-vega/nordvpn-action` is a public, MIT-licensed monorepo of composite GitHub Actions that route a runner through a NordVPN exit node. The actions handle credentials, write a `0600` auth file under `$RUNNER_TEMP`, and shell out to `openvpn` via `apt-get` packages. Anything that weakens those guarantees is in scope.
+`pau-vega/nordvpn-action` is a public, MIT-licensed composite GitHub Action that routes a runner through a NordVPN exit node. The action handles credentials, writes a `0600` auth file under `$RUNNER_TEMP`, and shells out to `openvpn` via `apt-get` packages. Anything that weakens those guarantees is in scope.
 
 ## Supported versions
 
-Only the latest minor of each `nordvpn-<region>-v<MAJOR>` line receives security fixes. Older minors of the same major may be patched on a best-effort basis.
+Only the latest minor of the `nordvpn-v<MAJOR>` line receives security fixes. Older minors of the same major may be patched on a best-effort basis.
 
-| Region    | Supported  |
-|-----------|------------|
-| `nordvpn-es-v1.x` | latest minor |
-| `nordvpn-us-v1.x` | latest minor |
-| `nordvpn-fr-v1.x` | latest minor |
-| Anything older    | no         |
+| Version line   | Supported  |
+|----------------|------------|
+| `nordvpn-v1.x` | latest minor |
+| Anything older | no         |
 
 ## Reporting a vulnerability
 
@@ -21,7 +19,7 @@ Use GitHub's private vulnerability reporting:
 
 1. Open <https://github.com/pau-vega/nordvpn-action/security/advisories/new>
 2. Provide:
-   - Affected region(s) and pinned ref (SHA or tag)
+   - Affected `region:` input value(s) and pinned ref (SHA or tag)
    - Runner OS version (`ubuntu-22.04`, `ubuntu-24.04`, etc.)
    - Reproduction: workflow YAML excerpt + the relevant step log (redact secrets first)
    - Impact summary: what an attacker gains (RCE, secret exfiltration, geo bypass, etc.)
@@ -56,7 +54,7 @@ This is a single-maintainer OSS project. Targets are good-faith, not contractual
 | Fix released (HIGH/CRITICAL) | within 30 days |
 | Fix released (MEDIUM/LOW) | within 90 days |
 
-A fix typically means a new patch release of the affected region (`nordvpn-<region>-v1.x.y+1`) with a CHANGELOG entry; the floating-major tag (`nordvpn-<region>-v1`) is force-moved by the existing `tag-floating-major` job so consumers on that pin form get the fix automatically. SHA-pinned consumers are notified via GitHub Security Advisory.
+A fix typically means a new patch release (`nordvpn-v1.x.y+1`) with a CHANGELOG entry; the floating-major tag (`nordvpn-v1`) is force-moved by the existing `tag-floating-major` job so consumers on that pin form get the fix automatically. SHA-pinned consumers are notified via GitHub Security Advisory.
 
 ## Coordinated disclosure
 
