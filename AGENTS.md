@@ -98,6 +98,7 @@ ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a              # v2
 github/codeql-action/*@8aad20d150bbac5944a9f9d289da16a4b0d87c1e            # v4.36.2
 step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411       # v2.19.4
 actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a            # v7.0.1
+peter-evans/enable-pull-request-automerge@a660677d5469627102a1c1e11409dd063606628d # v3.0.0
 ```
 
 ### Banned constructs

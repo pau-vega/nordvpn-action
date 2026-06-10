@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
 
 concurrency:
@@ -30,6 +31,19 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: .github/release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      - name: Extract PR number
+        if: steps.release.outputs.pr
+        id: extract
+        run: echo "number=$(echo '${{ steps.release.outputs.pr }}' | jq -r '.number')" >> "$GITHUB_OUTPUT"
+
+      - name: Enable auto-merge on release PR
+        if: steps.release.outputs.pr
+        uses: peter-evans/enable-pull-request-automerge@a660677d5469627102a1c1e11409dd063606628d # v3.0.0
+        with:
+          pull-request-number: ${{ steps.extract.outputs.number }}
+          merge-method: squash
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
   tag-floating-major:
     needs: [release-please]
