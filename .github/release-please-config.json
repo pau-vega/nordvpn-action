@@ -21,7 +21,7 @@
     { "type": "build", "section": "Build System", "hidden": true }
   ],
   "packages": {
-    "actions/nordvpn": {
+    ".": {
       "component": "nordvpn",
       "changelog-path": "CHANGELOG.md",
       "initial-version": "0.1.0"

@@ -4,11 +4,17 @@ on:
   push:
     branches: [main]
     paths:
-      - 'actions/**'
+      - 'action.yml'
+      - 'disconnect/**'
+      - 'scripts/**'
+      - 'vpn/**'
       - '.github/workflows/**'
   pull_request:
     paths:
-      - 'actions/**'
+      - 'action.yml'
+      - 'disconnect/**'
+      - 'scripts/**'
+      - 'vpn/**'
       - '.github/workflows/**'
   schedule:
     - cron: '0 8 * * 1'     # Monday 08:00 UTC — start of work week catch
@@ -86,7 +92,7 @@ jobs:
       - name: Connect NordVPN (${{ matrix.region }})
         if: steps.filter.outputs.run == 'true'
         id: connect
-        uses: ./actions/nordvpn
+        uses: ./
         with:
           region: ${{ matrix.region }}
           username: ${{ secrets.NORDVPN_SERVICE_USERNAME }}
@@ -135,7 +141,7 @@ jobs:
           echo "=== All verifications passed ==="
 
       - name: Disconnect VPN
-        uses: ./actions/nordvpn/disconnect
+        uses: ./disconnect
         if: always() && steps.filter.outputs.run == 'true'
 
   drift-issue:

@@ -1,5 +1,8 @@
-# Every file under actions/ — current and future — is owned by pau-vega.
-/actions/** @pau-vega
+# Main composite action (root action.yml for GitHub Marketplace).
+/action.yml @pau-vega
+/disconnect/ @pau-vega
+/scripts/ @pau-vega
+/vpn/ @pau-vega
 
 # Workflow and release tooling — same owner; ensures any PR touching CI hygiene
 # routes for review rather than relying on the maintainer to spot it.
