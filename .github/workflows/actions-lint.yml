@@ -3,15 +3,19 @@ name: actions-lint
 on:
   pull_request:
     paths:
-      - 'actions/**'
+      - 'action.yml'
+      - 'disconnect/**'
+      - 'scripts/**'
+      - 'vpn/**'
       - '.github/workflows/**'
-      - '.github/actions/**'
   push:
     branches: [main]
     paths:
-      - 'actions/**'
+      - 'action.yml'
+      - 'disconnect/**'
+      - 'scripts/**'
+      - 'vpn/**'
       - '.github/workflows/**'
-      - '.github/actions/**'
 
 permissions:
   contents: read
@@ -43,7 +47,7 @@ jobs:
         env:
           SHELLCHECK_OPTS: "-e SC1090 -e SC1091"
         with:
-          scandir: ./actions
+          scandir: ./scripts
           severity: style
           check_together: 'yes'
 

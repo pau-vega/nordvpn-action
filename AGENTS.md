@@ -14,7 +14,7 @@ Local lint mirrors CI (install via `brew install actionlint shellcheck jq gh`):
 
 ```bash
 actionlint .github/workflows/*.yml          # workflow YAML + inline `run:` shell
-shellcheck actions/**/scripts/*.sh          # standalone shell scripts
+shellcheck scripts/*.sh                  # standalone shell scripts
 ```
 
 Phase verification dispatcher (runs `.planning/`-driven verify scripts):
@@ -37,21 +37,20 @@ End-to-end self-test is **not runnable locally** — needs `NORDVPN_SERVICE_USER
 ### Single parameterized action
 
 ```
-actions/nordvpn/
-  action.yml              # composite — install → connect (2-attempt retry) → verify
+action.yml               # composite — install → connect (2-attempt retry) → verify
                           # takes required `region:` input (ES, US, or FR)
-  disconnect/action.yml   # sibling sub-action invoked with `if: always()`
-  scripts/
-    install.sh            # apt-get openvpn + openvpn-systemd-resolved; asserts toolchain
-    connect.sh            # writes 0600 auth file, maps region→country_id, picks live server via NordVPN API, polls tun0
-    verify-country.sh     # ipinfo.io (hard) + ifconfig.co (advisory), emits 6 outputs
-    disconnect.sh         # SIGTERM→SIGKILL openvpn, rm auth file; never fails the job
-  vpn/nordvpn.ovpn        # baseline OpenVPN config; `--remote` overrides at runtime
+disconnect/action.yml    # sibling sub-action invoked with `if: always()`
+scripts/
+  install.sh            # apt-get openvpn + openvpn-systemd-resolved; asserts toolchain
+  connect.sh            # writes 0600 auth file, maps region→country_id, picks live server via NordVPN API, polls tun0
+  verify-country.sh     # ipinfo.io (hard) + ifconfig.co (advisory), emits 6 outputs
+  disconnect.sh         # SIGTERM→SIGKILL openvpn, rm auth file; never fails the job
+vpn/nordvpn.ovpn        # baseline OpenVPN config; `--remote` overrides at runtime
 ```
 
 The single action consolidates what used to be three near-identical region trees (`nordvpn-{es,us,fr}/`). The only region-specific state is a `case` statement in `connect.sh` mapping ISO-2 codes to NordVPN `country_id`s (ES=202, US=228, FR=74). The `.ovpn` file is shared — its placeholder `remote` line is always overridden at runtime by the API-resolved server hostname.
 
-Adding a new region: add the ISO-2 → `country_id` mapping to the `case` statement, add the code to the self-test matrix, document the region in `actions/nordvpn/README.md`. No new directory, no new scripts, no new release-please package.
+Adding a new region: add the ISO-2 → `country_id` mapping to the `case` statement, add the code to the self-test matrix, document the region in `README.md`. No new directory, no new scripts, no new release-please package.
 
 ### Key constraints embedded in the scripts
 
@@ -59,7 +58,7 @@ Adding a new region: add the ISO-2 → `country_id` mapping to the `case` statem
 - **`set -euo pipefail` in connect/install/verify; `set -u` only in disconnect** — disconnect must never fail the job under `if: always()`.
 - **Readiness is `ip -4 addr show tun0` returning `inet `**, NOT `openvpn --daemon`'s exit code (the daemon forks and exits 0 before the handshake completes). Poll 2s, 30s timeout.
 - **`CONNECT_DURATION_MS`** is passed across composite-step boundaries via `$GITHUB_ENV` (set in `connect.sh`, consumed by `verify-country.sh`).
-- **`COUNTRY_CODE` / `COUNTRY_ID`** are set in `connect.sh` from the `region` input via a `case` statement. The `case` is the single source of truth for which regions are supported — keep `actions/nordvpn/README.md` in sync.
+- **`COUNTRY_CODE` / `COUNTRY_ID`** are set in `connect.sh` from the `region` input via a `case` statement. The `case` is the single source of truth for which regions are supported — keep the Inputs table in the README in sync.
 - **Auth file:** `$RUNNER_TEMP/nordvpn-auth.txt` at mode `0600` via `umask 077 + printf + chmod`. Removed by `disconnect.sh`.
 - **Server selection:** `connect.sh` queries `api.nordvpn.com/v1/servers/recommendations` (NOT DNS round-robin on `<region>.nordvpn.com` — that hostname doesn't exist). `--remote` CLI flag overrides the `.ovpn` config.
 - **Geo verification:** primary `ipinfo.io` `.country` must match the `region` input (hard fail); secondary `ifconfig.co` `.country_iso` is advisory only (ifconfig.co lags on some servers). Field names differ between providers — `ifconfig.co.country` is the English name, NOT the ISO-2 code.
@@ -67,7 +66,7 @@ Adding a new region: add the ISO-2 → `country_id` mapping to the `case` statem
 
 ### Why a separate `disconnect/` sub-action?
 
-Composite actions do **not** support `post:` ([community discussion #26743](https://github.com/orgs/community/discussions/26743)). Consumers must invoke `actions/nordvpn/disconnect` as a sibling step with `if: always()`. Do not fold disconnect into the main action.
+Composite actions do **not** support `post:` ([community discussion #26743](https://github.com/orgs/community/discussions/26743)). Consumers must invoke `disconnect` as a sibling step with `if: always()`. Do not fold disconnect into the main action.
 
 ## Frozen v1 contracts
 
@@ -122,14 +121,14 @@ Required from commit #1. release-please depends on commit-history shape; do not 
 `fork-check` + a single `self-test` matrix job:
 
 - `fork-check` outputs `is_fork=true` for PRs from forks → `self-test` skips with `::notice::`.
-- `self-test` runs a matrix over `region: [ES, US, FR]`, invokes `./actions/nordvpn` with `region: ${{ matrix.region }}`, asserts all 6 outputs non-empty, asserts `COUNTRY` matches the matrix value, plus a workflow-level `curl ipinfo.io/country` check. `workflow_dispatch` can scope the run to a single region.
+- `self-test` runs a matrix over `region: [ES, US, FR]`, invokes the local action with `region: ${{ matrix.region }}`, asserts all 6 outputs non-empty, asserts `COUNTRY` matches the matrix value, plus a workflow-level `curl ipinfo.io/country` check. `workflow_dispatch` can scope the run to a single region.
 - On `schedule` runs: `drift-issue` upserts a `region-drift`-labeled issue on failure; `drift-close` closes the existing one on full success.
 
 Fork PRs are intentionally skipped — `pull_request` (not `pull_request_target`) means fork code never reaches `Preview` secrets. Maintainer pulls fork PRs to a trusted branch for full self-test runs.
 
 ## Pointers
 
-- Inputs/outputs/troubleshooting: `actions/nordvpn/README.md`.
+- Inputs/outputs/troubleshooting: `README.md`.
 - Phase artifacts, requirements, research, pitfalls: `.planning/`.
 
 ## Project Skills

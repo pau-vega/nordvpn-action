@@ -58,7 +58,7 @@ jobs:
       - name: Force-move floating major tag
         shell: bash
         run: |
-          NEW_VERSION="$(jq -r '.["actions/nordvpn"]' .release-please-manifest.json)"
+          NEW_VERSION="$(jq -r '.["."]' .release-please-manifest.json)"
           MAJOR="${NEW_VERSION%%.*}"
           FLOATING_TAG="nordvpn-v${MAJOR}"
 

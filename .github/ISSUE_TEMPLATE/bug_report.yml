@@ -28,7 +28,7 @@ body:
     id: pinned-ref
     attributes:
       label: Pinned ref
-      description: "The SHA or tag your workflow pins (the value after `@` in `uses: pau-vega/nordvpn-action/actions/nordvpn@<ref>`)."
+      description: "The SHA or tag your workflow pins (the value after `@` in `uses: pau-vega/nordvpn-action@<ref>`)."
       placeholder: "e.g. de0fac2e4500dabe0009e67214ff5f5447ce83dd  or  nordvpn-v1.0.0  or  nordvpn-v1"
     validations:
       required: true
@@ -94,7 +94,7 @@ body:
       options:
         - label: I confirmed the same behavior on the latest tagged release.
           required: false
-        - label: I checked the [action README troubleshooting section](./actions/nordvpn/README.md) and did not find a documented cause.
+        - label: I checked the [README troubleshooting section](../README.md) and did not find a documented cause.
           required: false
         - label: This is not a security or credential-handling issue. (If it is — close this and use the private channel in [`SECURITY.md`](../SECURITY.md).)
           required: true

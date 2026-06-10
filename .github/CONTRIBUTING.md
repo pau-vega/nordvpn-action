@@ -15,7 +15,7 @@ brew install actionlint shellcheck jq gh
 
 # Run linters before opening a PR
 actionlint .github/workflows/*.yml
-shellcheck actions/**/scripts/*.sh
+shellcheck scripts/*.sh
 ```
 
 End-to-end testing requires `NORDVPN_SERVICE_USERNAME` / `NORDVPN_SERVICE_PASSWORD` configured in the `Preview` environment — not runnable on a fork. The `self-test.yml` workflow skips on fork PRs and the maintainer re-runs from a trusted branch before merging.
@@ -60,7 +60,7 @@ Before requesting review:
 
 - [ ] Conventional Commit type and scope are correct (see table above).
 - [ ] `actionlint .github/workflows/*.yml` clean.
-- [ ] `shellcheck actions/**/scripts/*.sh` clean.
+- [ ] `shellcheck scripts/*.sh` clean.
 - [ ] Did NOT hand-edit `.release-please-manifest.json` or `actions/*/CHANGELOG.md` — release-please owns those.
 - [ ] All `uses:` lines pin a 40-char SHA + trailing `# vX.Y.Z` comment (Dependabot updates both atomically). No `@main`, no `@v5`.
 - [ ] If the change adds a workflow, the workflow has a top-level `permissions:` block and per-job `timeout-minutes`.
@@ -70,7 +70,7 @@ The maintainer will re-run `self-test.yml` from a trusted branch for any non-tri
 
 ## Releases
 
-This repo uses [release-please](https://github.com/googleapis/release-please) with `separate-pull-requests: true` and `include-component-in-tag: true`. The single `nordvpn` package releases on every conventional commit that lands under `actions/nordvpn/**`. Tags take the form `nordvpn-vX.Y.Z` and the floating major tag `nordvpn-v<MAJOR>` is force-moved on every release by the `tag-floating-major` job in `release-please.yml`.
+This repo uses [release-please](https://github.com/googleapis/release-please) with `separate-pull-requests: true` and `include-component-in-tag: true`. The single `nordvpn` package releases on every conventional commit. Tags take the form `nordvpn-vX.Y.Z` and the floating major tag `nordvpn-v<MAJOR>` is force-moved on every release by the `tag-floating-major` job in `release-please.yml`.
 
 Maintainers merge the release-please PR; that triggers the actual tag + release publication. No human edits to `CHANGELOG.md` or `.release-please-manifest.json`.
 
