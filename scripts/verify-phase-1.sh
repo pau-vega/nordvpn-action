@@ -128,7 +128,7 @@ check_req "SCAF-04" "No per-region literals in CODEOWNERS" bash -c '! grep -qE "
 check_req "SCAF-05" "Dependabot exists" test -f .github/dependabot.yml
 check_req "SCAF-05" "Dependabot has plural 'directories:'" grep -qE 'directories:' .github/dependabot.yml
 check_req "SCAF-05" "No singular 'directory:'" bash -c '! grep -qE "^\s+directory:" .github/dependabot.yml'
-check_req "SCAF-05" "Dependabot has 2 paths" bash -c '[ "$(grep -cE "^\s+- \"/" .github/dependabot.yml)" = "2" ]'
+check_req "SCAF-05" "Dependabot has 2 paths" test 2 -eq "$(grep -cE '^\s+- "/' .github/dependabot.yml)"
 check_req "SCAF-05" "Dependabot has weekly schedule" grep -qE 'interval: "weekly"' .github/dependabot.yml
 check_req "SCAF-05" "Dependabot deps prefix" grep -qE 'prefix: "deps"' .github/dependabot.yml
 
