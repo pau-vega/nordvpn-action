@@ -50,9 +50,7 @@ jobs:
 
   self-test:
     needs: fork-check
-    if: |
-      needs.fork-check.outputs.is_fork == 'false' &&
-      (github.event_name != 'workflow_dispatch' || github.event.inputs.region == 'all' || github.event.inputs.region == matrix.region)
+    if: needs.fork-check.outputs.is_fork == 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: Preview
@@ -61,7 +59,18 @@ jobs:
       matrix:
         region: [ES, US, FR]
     steps:
+      - name: Filter region
+        id: filter
+        run: |
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ] || [ "${{ github.event.inputs.region }}" = "all" ] || [ "${{ github.event.inputs.region }}" = "${{ matrix.region }}" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping region ${{ matrix.region }} — not requested via workflow_dispatch"
+          fi
+
       - name: Harden the runner (audit egress)
+        if: steps.filter.outputs.run == 'true'
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           # `audit` logs unexpected egress without blocking — useful for catching
@@ -72,8 +81,10 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        if: steps.filter.outputs.run == 'true'
 
       - name: Connect NordVPN (${{ matrix.region }})
+        if: steps.filter.outputs.run == 'true'
         id: connect
         uses: ./actions/nordvpn
         with:
@@ -82,6 +93,7 @@ jobs:
           password: ${{ secrets.NORDVPN_SERVICE_PASSWORD }}
 
       - name: Post-connect verify
+        if: steps.filter.outputs.run == 'true'
         env:
           EXIT_IP: ${{ steps.connect.outputs.exit-ip }}
           COUNTRY: ${{ steps.connect.outputs.country }}
@@ -124,7 +136,7 @@ jobs:
 
       - name: Disconnect VPN
         uses: ./actions/nordvpn/disconnect
-        if: always()
+        if: always() && steps.filter.outputs.run == 'true'
 
   drift-issue:
     needs: [self-test]
