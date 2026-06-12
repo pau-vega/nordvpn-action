@@ -5,6 +5,7 @@ Composite GitHub Action that routes a runner through a NordVPN exit node in a se
 [![CI](https://github.com/pau-vega/nordvpn-action/actions/workflows/actions-lint.yml/badge.svg)](https://github.com/pau-vega/nordvpn-action/actions/workflows/actions-lint.yml)
 [![Self-test](https://github.com/pau-vega/nordvpn-action/actions/workflows/self-test.yml/badge.svg)](https://github.com/pau-vega/nordvpn-action/actions/workflows/self-test.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/pau-vega/nordvpn-action/badge)](https://securityscorecards.dev/viewer/?uri=github.com/pau-vega/nordvpn-action)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13174/badge)](https://www.bestpractices.dev/projects/13174)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 A single composite action that takes a `region:` input and connects the runner through a NordVPN exit node in ES, US, or FR. Install / connect (with retry) / verify / disconnect, full self-test workflow, release-please wiring, Dependabot, branch protection. First release tags (`nordvpn-v1.0.0`) ship via release-please; pin the SHA or the floating-major tag once published.
