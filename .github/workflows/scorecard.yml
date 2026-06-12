@@ -38,6 +38,7 @@ jobs:
         with:
           results_file: results.sarif
           results_format: sarif
+          repo_token: ${{ secrets.SCORECARD_TOKEN }}
           # `publish_results` requires `id-token: write` (above) and writes to the
           # public OpenSSF Scorecard dashboard so the badge in README resolves.
           publish_results: true
