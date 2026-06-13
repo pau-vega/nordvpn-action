@@ -9,6 +9,8 @@ on:
       - 'disconnect/**'
       - 'scripts/**'
       - 'vpn/**'
+      - '.release-please-manifest.json'
+      - '**/CHANGELOG.md'
   pull_request:
     branches: [main]
     paths:
@@ -17,6 +19,8 @@ on:
       - 'disconnect/**'
       - 'scripts/**'
       - 'vpn/**'
+      - '.release-please-manifest.json'
+      - '**/CHANGELOG.md'
   schedule:
     # Tuesday 06:00 UTC — separate from the Saturday Scorecard cron and the Monday self-test cron.
     - cron: '0 6 * * 2'
